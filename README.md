@@ -4,7 +4,7 @@
 
 Este repositorio contiene el código fuente de la plataforma integral de invitaciones y gestión logística para el matrimonio de **Juan Mauricio Viamont Rico** y **Lenan Vaca Lozano**. 
 
-Más que un proyecto de software, este sistema fue diseñado, arquitectado y programado desde cero como un **regalo de bodas** de parte del hermano del novio. Cada línea de código, cada transición y cada píxel (resaltado en ese hermoso color *Pistachio* que eligió la novia) fue pensado para que la experiencia de los invitados sea tan mágica como el día del evento.
+Más que un proyecto de software, este sistema fue diseñado, arquitectado y programado desde cero como un **regalo de bodas**. Cada línea de código, cada transición y cada píxel fue pensado para que la experiencia de los invitados sea tan mágica como el día del evento.
 
 ---
 
@@ -78,6 +78,6 @@ Si deseas correr este proyecto en tu entorno local:
 
 ## 💌 Autoría
 
-Diseñado y desarrollado con todo el cariño del mundo por **Álvaro Viamont Rico**, para celebrar el inicio de la nueva familia Viamont Vaca.
+Diseñado y desarrollado con todo el cariño del mundo por **Alvaro Viamont Rico & Jessica Orihuela Rojas**, para celebrar el inicio de la nueva familia Viamont Vaca.
 
 **¡Que vivan los novios!** 🥂
