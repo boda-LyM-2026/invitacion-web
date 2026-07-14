@@ -1,0 +1,34 @@
+/* src/theme/tokens.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Paleta Core (Pistachio como resalte) */
+    --color-primary: #93A27D;
+    --color-primary-dark: #616E4D;
+    --color-primary-soft: #BCC3A3;
+    
+    /* Tonos Neutros Premium */
+    --color-neutral-champagne: #EBE3D5;
+    --color-neutral-alabaster: #F1F0E8;
+    --color-neutral-white: #FFFFFF;
+    --color-neutral-dark: #2C3E2D;
+
+    /* Estados de Interfaz */
+    --color-status-success: #829272;
+    --color-status-error: #B07A7A;
+    --color-status-pending: #C2B295;
+
+    /* Tipografías */
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Montserrat', Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    background-color: var(--color-neutral-alabaster);
+    color: var(--color-neutral-dark);
+    font-family: var(--font-sans);
+  }
+}
