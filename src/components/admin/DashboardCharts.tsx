@@ -1,0 +1,114 @@
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import type { GrupoInvitacion } from "@/types/domain";
+
+const COLORES_ESTADO: Record<string, string> = {
+  Confirmado: "#93A27D",
+  Pendiente: "#DDD0B8",
+  Rechazado: "#616E4D",
+};
+
+const ETIQUETAS_CATEGORIA: Record<string, string> = {
+  familia_novia: "Familia novia",
+  familia_novio: "Familia novio",
+  amigos_novia: "Amigos novia",
+  amigos_novio: "Amigos novio",
+  trabajo: "Trabajo",
+  otros: "Otros",
+};
+
+interface DashboardChartsProps {
+  grupos: GrupoInvitacion[];
+}
+
+export function DashboardCharts({ grupos }: DashboardChartsProps) {
+  const porCategoria = Object.entries(ETIQUETAS_CATEGORIA).map(([key, label]) => ({
+    categoria: label,
+    grupos: grupos.filter((g) => g.categoria === key).length,
+  }));
+
+  const porEstado = [
+    { name: "Confirmado", value: grupos.filter((g) => g.estado === "confirmed").length },
+    { name: "Pendiente", value: grupos.filter((g) => g.estado === "pending").length },
+    { name: "Rechazado", value: grupos.filter((g) => g.estado === "declined").length },
+  ];
+
+  const serieTiempo = buildSerieTiempo(grupos);
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <h3 className="mb-4 font-display text-lg text-olive-900">Grupos por categoría</h3>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={porCategoria}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#EBE3D5" />
+            <XAxis dataKey="categoria" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Bar dataKey="grupos" fill="#93A27D" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <h3 className="mb-4 font-display text-lg text-olive-900">Distribución de estados</h3>
+        <ResponsiveContainer width="100%" height={260}>
+          <PieChart>
+            <Pie data={porEstado} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+              {porEstado.map((entry) => (
+                <Cell key={entry.name} fill={COLORES_ESTADO[entry.name]} />
+              ))}
+            </Pie>
+            <Legend />
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5 lg:col-span-2">
+        <h3 className="mb-4 font-display text-lg text-olive-900">Confirmaciones en el tiempo</h3>
+        <ResponsiveContainer width="100%" height={240}>
+          <LineChart data={serieTiempo}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#EBE3D5" />
+            <XAxis dataKey="fecha" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Line type="monotone" dataKey="acumulado" stroke="#616E4D" strokeWidth={2} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function buildSerieTiempo(grupos: GrupoInvitacion[]) {
+  const confirmados = grupos
+    .filter((g) => g.estado === "confirmed" && g.respondido_en)
+    .map((g) => g.respondido_en as string)
+    .sort();
+
+  const porDia = new Map<string, number>();
+  confirmados.forEach((iso) => {
+    const dia = iso.slice(0, 10);
+    porDia.set(dia, (porDia.get(dia) ?? 0) + 1);
+  });
+
+  let acumulado = 0;
+  return Array.from(porDia.entries()).map(([fecha, cantidad]) => {
+    acumulado += cantidad;
+    return { fecha, acumulado };
+  });
+}

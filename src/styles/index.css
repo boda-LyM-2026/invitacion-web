@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: #93a27d;
+    color: #f1f0e8;
+  }
+
+  :focus-visible {
+    outline: 2px solid #616e4d;
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: "Fraunces", serif;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-body text-[0.7rem] uppercase tracking-widest2 text-olive/70;
+  }
+
+  .section-shell {
+    @apply relative mx-auto w-full max-w-md px-6 py-20 sm:max-w-lg md:max-w-2xl lg:max-w-3xl;
+  }
+
+  .divider-branch {
+    @apply mx-auto my-8 h-8 w-24 text-pistachio-500;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-olive px-8 py-3 font-body text-sm uppercase tracking-[0.18em] text-alabaster shadow-card transition-transform duration-300 hover:-translate-y-0.5 hover:bg-olive-900 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-pistachio-400 bg-transparent px-8 py-3 font-body text-sm uppercase tracking-[0.18em] text-olive-900 transition-colors duration-300 hover:bg-pistachio-100 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .card-surface {
+    @apply rounded-[28px] border border-pistachio-200/70 bg-white/70 p-6 shadow-card backdrop-blur-sm;
+  }
+}
+
+/* Respect reduced motion preference across the whole experience */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
