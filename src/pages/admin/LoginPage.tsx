@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { WaxSeal } from "@/components/shared/WaxSeal";
+import { ParticleField } from "@/components/shared/ParticleField";
 
 export default function LoginPage() {
   const { session, signIn } = useAuth();
@@ -20,41 +22,87 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-leaf-fade px-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-card">
-        <WaxSeal size={48} className="mx-auto mb-4" />
-        <h1 className="text-center font-display text-xl text-olive-900">Panel de Lenan &amp; Mauricio</h1>
-        <p className="mt-1 text-center text-xs text-neutral-500">Acceso solo para los novios y organizadores</p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+      {/* Background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%)",
+        }}
+      />
+      <div className="absolute inset-0 bg-olive-vignette" />
 
-        <div className="mt-6 space-y-3">
-          <input
-            type="email"
-            required
-            placeholder="Correo"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="password"
-            required
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
-          />
+      {/* Particles */}
+      <ParticleField count={25} color="rgba(231,219,203,0.3)" />
+
+      {/* Form */}
+      <motion.form
+        onSubmit={handleSubmit}
+        className="relative z-10 w-full max-w-sm"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="glass-card p-8">
+          <WaxSeal size={56} className="mx-auto mb-6" />
+
+          <h1 className="text-center font-display text-2xl font-light italic text-alabaster">
+            Panel de Lenan &amp; Mauricio
+          </h1>
+          <p className="mt-2 text-center font-body text-xs uppercase tracking-widest2 text-alabaster/50">
+            Acceso solo para los novios y organizadores
+          </p>
+
+          <div className="mt-8 space-y-4">
+            <div>
+              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-alabaster/50">
+                Correo
+              </label>
+              <input
+                type="email"
+                required
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl border border-alabaster/20 bg-alabaster/10 px-4 py-3 font-body text-sm text-alabaster placeholder:text-alabaster/30 focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/30 transition-all duration-300"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-alabaster/50">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-alabaster/20 bg-alabaster/10 px-4 py-3 font-body text-sm text-alabaster placeholder:text-alabaster/30 focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/30 transition-all duration-300"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <motion.p
+              className="mt-4 text-center font-body text-sm text-champagne"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {error}
+            </motion.p>
+          )}
+
+          <motion.button
+            type="submit"
+            disabled={enviando}
+            className="mt-8 w-full rounded-xl bg-olive py-3 font-body text-sm uppercase tracking-[0.18em] text-alabaster shadow-glow-olive transition-all duration-500 hover:bg-olive-500 hover:shadow-glow-olive disabled:opacity-50"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {enviando ? "Ingresando..." : "Ingresar"}
+          </motion.button>
         </div>
-
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={enviando}
-          className="mt-6 w-full rounded-lg bg-olive py-2.5 text-sm font-medium text-white hover:bg-olive-900 disabled:opacity-50"
-        >
-          {enviando ? "Ingresando..." : "Ingresar"}
-        </button>
-      </form>
+      </motion.form>
     </div>
   );
 }

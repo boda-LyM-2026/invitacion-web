@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGrupoInvitacion } from "@/hooks/useGrupoInvitacion";
 import { IntroSequence } from "@/components/intro/IntroSequence";
 import { Hero } from "@/components/shared/Hero";
 import { Footer } from "@/components/shared/Footer";
 import { WaxSeal } from "@/components/shared/WaxSeal";
+import { FilmGrain } from "@/components/shared/FilmGrain";
+import { ScrollProgress } from "@/components/shared/ScrollProgress";
+import { AudioPlayer } from "@/components/shared/AudioPlayer";
 
 import { OurStory } from "@/components/scenarios/pending/OurStory";
 import { FormalInvitation } from "@/components/scenarios/pending/FormalInvitation";
@@ -21,18 +25,36 @@ import { ThankYouScreen } from "@/components/scenarios/declined/ThankYouScreen";
 
 function EstadoCarga() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-alabaster">
-      <WaxSeal size={48} className="animate-pulse" />
-      <p className="eyebrow">Abriendo tu invitación...</p>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-cinematic-dark">
+      <motion.div
+        animate={{
+          boxShadow: [
+            "0 0 20px rgba(130,134,97,0.2)",
+            "0 0 40px rgba(130,134,97,0.4)",
+            "0 0 20px rgba(130,134,97,0.2)",
+          ],
+        }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        <WaxSeal size={56} />
+      </motion.div>
+      <motion.p
+        className="eyebrow text-alabaster/60"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        Abriendo tu invitación...
+      </motion.p>
     </div>
   );
 }
 
 function EstadoError({ mensaje }: { mensaje: string }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-alabaster px-6 text-center">
-      <p className="font-display text-2xl italic text-olive-900">{mensaje}</p>
-      <p className="font-body text-sm text-ink/60">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-cinematic-dark px-6 text-center">
+      <WaxSeal size={64} animated={false} />
+      <p className="font-display text-3xl font-light italic text-alabaster">{mensaje}</p>
+      <p className="font-body text-sm text-alabaster/50">
         Revisa el enlace que te compartieron los novios, o escríbeles directamente.
       </p>
     </div>
@@ -47,44 +69,81 @@ export default function InvitationPage() {
   if (loading) return <EstadoCarga />;
   if (error || !grupo) return <EstadoError mensaje={error ?? "Invitación no encontrada"} />;
 
-  // RF-06: la intro cinemática solo aplica al escenario "pending"; quienes ya
-  // respondieron entran directo a su experiencia (confirmada o de agradecimiento).
+  // Intro cinemática solo para escenario "pending"
   if (grupo.estado === "pending" && !introVisto) {
     return <IntroSequence onFinished={() => setIntroVisto(true)} />;
   }
 
   if (grupo.estado === "declined") {
     return (
-      <main>
-        <ThankYouScreen nombreInvitado={grupo.invitado_principal} />
-        <Footer />
-      </main>
+      <>
+        <FilmGrain />
+        <AudioPlayer />
+        <AnimatePresence mode="wait">
+          <motion.main
+            key="declined"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <ThankYouScreen nombreInvitado={grupo.invitado_principal} />
+            <Footer />
+          </motion.main>
+        </AnimatePresence>
+      </>
     );
   }
 
   if (grupo.estado === "confirmed") {
     return (
-      <main>
-        <Hero nombreInvitado={grupo.invitado_principal} />
-        <Countdown />
-        <LocationSection />
-        <Timeline />
-        <TableAssignment mesa={grupo.mesa} />
-        <Recommendations />
-        <Footer />
-      </main>
+      <>
+        <FilmGrain />
+        <ScrollProgress />
+        <AudioPlayer />
+        <AnimatePresence mode="wait">
+          <motion.main
+            key="confirmed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <Hero nombreInvitado={grupo.invitado_principal} />
+            <Countdown />
+            <LocationSection />
+            <Timeline />
+            <TableAssignment mesa={grupo.mesa} />
+            <Recommendations />
+            <Footer />
+          </motion.main>
+        </AnimatePresence>
+      </>
     );
   }
 
   // Escenario A — pending
   return (
-    <main>
-      <Hero nombreInvitado={grupo.invitado_principal} />
-      <OurStory />
-      <FormalInvitation />
-      <CodeOfConduct />
-      <RsvpForm grupo={grupo} onSuccess={refetch} />
-      <Footer />
-    </main>
+    <>
+      <FilmGrain />
+      <ScrollProgress />
+      <AudioPlayer />
+      <AnimatePresence mode="wait">
+        <motion.main
+          key="pending"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <Hero nombreInvitado={grupo.invitado_principal} />
+          <OurStory />
+          <FormalInvitation />
+          <CodeOfConduct />
+          <RsvpForm grupo={grupo} onSuccess={refetch} />
+          <Footer />
+        </motion.main>
+      </AnimatePresence>
+    </>
   );
 }

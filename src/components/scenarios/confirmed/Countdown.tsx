@@ -1,6 +1,8 @@
+import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
 import { useCountdown } from "@/hooks/useCountdown";
+import { ParticleField } from "@/components/shared/ParticleField";
 
 const FECHA_BODA = (import.meta.env.VITE_WEDDING_DATETIME as string) ?? "2026-11-14T18:00:00-04:00";
 
@@ -15,27 +17,64 @@ export function Countdown() {
   const cuenta = useCountdown(FECHA_BODA);
 
   return (
-    <section className="section-shell bg-leaf-fade text-center">
-      <Reveal>
-        <p className="eyebrow">Falta poco</p>
-        <h2 className="mt-3 font-display text-3xl italic text-olive-900">Nos vemos muy pronto</h2>
-        <OliveDivider className="text-pistachio-400" />
-      </Reveal>
+    <section className="section-cinematic relative overflow-hidden">
+      {/* Background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "radial-gradient(120% 120% at 50% 0%, #F9F9EF 0%, #E7DBCB 45%, #CDD2BC 100%)",
+        }}
+      />
+      <div className="absolute inset-0 bg-olive-vignette" />
 
-      <Reveal delay={0.15} className="mx-auto grid max-w-sm grid-cols-4 gap-3">
-        {UNIDADES.map(({ key, label }) => (
-          <div key={key} className="card-surface py-4">
-            <p className="font-display text-3xl text-olive-900">
-              {String(cuenta[key]).padStart(2, "0")}
-            </p>
-            <p className="eyebrow mt-1 text-pistachio-600">{label}</p>
-          </div>
-        ))}
-      </Reveal>
+      {/* Particles */}
+      <ParticleField count={25} color="rgba(130,134,97,0.3)" />
 
-      {cuenta.haPasado && (
-        <p className="mt-6 font-display italic text-olive-900">¡Hoy es el gran día!</p>
-      )}
+      <div className="relative z-10 text-center">
+        <Reveal variant="fade-up">
+          <p className="eyebrow">Falta poco</p>
+          <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
+            Nos vemos muy pronto
+          </h2>
+          <OliveDivider className="text-pistachio-400" />
+        </Reveal>
+
+        <Reveal delay={0.2} variant="scale-in" className="mx-auto mt-10 grid max-w-sm grid-cols-4 gap-4">
+          {UNIDADES.map(({ key, label }, i) => (
+            <motion.div
+              key={key}
+              className="card-surface shimmer-border py-5"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <motion.p
+                className="font-display text-4xl font-light text-olive-900"
+                key={cuenta[key]}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {String(cuenta[key]).padStart(2, "0")}
+              </motion.p>
+              <p className="eyebrow mt-2 text-olive">{label}</p>
+            </motion.div>
+          ))}
+        </Reveal>
+
+        {cuenta.haPasado && (
+          <Reveal delay={0.5} variant="scale-in">
+            <motion.p
+              className="mt-8 font-display text-2xl italic text-olive-900"
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              ¡Hoy es el gran día!
+            </motion.p>
+          </Reveal>
+        )}
+      </div>
     </section>
   );
 }

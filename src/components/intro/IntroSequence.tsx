@@ -1,68 +1,71 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { WaxSeal } from "@/components/shared/WaxSeal";
+import { ParticleField } from "@/components/shared/ParticleField";
 
 interface IntroSequenceProps {
   onFinished: () => void;
   novios?: string;
 }
 
-type Fase = "sobre" | "sello" | "apertura" | "titulo";
+type Fase = "oscuridad" | "sobre" | "sello" | "apertura" | "revelacion" | "salida";
 
 const DURACIONES: Record<Fase, number> = {
-  sobre: 1100,
-  sello: 1200,
-  apertura: 1300,
-  titulo: 2000,
+  oscuridad: 1200,
+  sobre: 2000,
+  sello: 1800,
+  apertura: 2200,
+  revelacion: 3000,
+  salida: 1500,
 };
 
-const ORDEN: Fase[] = ["sobre", "sello", "apertura", "titulo"];
-const DURACION_SALIDA = 0.8;
+const ORDEN: Fase[] = ["oscuridad", "sobre", "sello", "apertura", "revelacion", "salida"];
 
-/** Ramita decorativa de fondo: mismo lenguaje visual que OliveDivider, pero suelta y flotante. */
-function RamitaFlotante({ className, delay = 0 }: { className: string; delay?: number }) {
+function OliveSprig({ className, delay = 0 }: { className: string; delay?: number }) {
   return (
     <motion.svg
-      viewBox="0 0 60 60"
-      className={`pointer-events-none absolute h-16 w-16 text-champagne/25 sm:h-20 sm:w-20 ${className}`}
+      viewBox="0 0 80 80"
+      className={`pointer-events-none absolute h-20 w-20 text-champagne/20 sm:h-24 sm:w-24 ${className}`}
       fill="none"
       aria-hidden="true"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1, y: [0, -10, 0], rotate: [0, 4, 0] }}
+      initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        rotate: 0,
+        y: [0, -15, 0],
+      }}
       transition={{
-        opacity: { duration: 1.2, delay },
-        scale: { duration: 1.2, delay },
-        y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay },
-        rotate: { duration: 6, repeat: Infinity, ease: "easeInOut", delay },
+        opacity: { duration: 1.5, delay },
+        scale: { duration: 1.5, delay },
+        rotate: { duration: 1.5, delay },
+        y: { duration: 8, repeat: Infinity, ease: "easeInOut", delay },
       }}
     >
       <path
-        d="M30 4 C 26 16, 34 22, 30 32 C 26 42, 34 48, 30 56"
+        d="M40 6 C 34 20, 46 28, 40 42 C 34 56, 46 64, 40 76"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.2"
         strokeLinecap="round"
       />
-      {[14, 26, 38, 48].map((y, i) => (
-        <path
+      {[18, 32, 48, 62].map((y, i) => (
+        <motion.path
           key={y}
-          d={i % 2 === 0 ? `M30 ${y} q -9 -4 -13 2` : `M30 ${y} q 9 -4 13 2`}
+          d={i % 2 === 0 ? `M40 ${y} q -12 -5 -16 2` : `M40 ${y} q 12 -5 16 2`}
           stroke="currentColor"
-          strokeWidth="1.1"
+          strokeWidth="1"
           strokeLinecap="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.8, delay: delay + 0.3 + i * 0.1 }}
         />
       ))}
     </motion.svg>
   );
 }
 
-/**
- * RF-04. Un mismo sobre persiste durante toda la secuencia y va cambiando
- * de estado (no son escenas que se reemplazan de golpe): cerrado -> el
- * sello se agrieta y se rompe -> la solapa se abre -> la carta sale del
- * sobre y crece hasta revelar los nombres -> fundido hacia la invitación.
- */
 export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: IntroSequenceProps) {
-  const [fase, setFase] = useState<Fase>("sobre");
+  const [fase, setFase] = useState<Fase>("oscuridad");
   const [saliendo, setSaliendo] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
@@ -86,8 +89,7 @@ export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: Intro
     return () => {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fase, saliendo]);
+  }, [fase, saliendo, prefersReducedMotion, onFinished]);
 
   function handleSkip() {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
@@ -96,127 +98,199 @@ export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: Intro
 
   if (prefersReducedMotion) return null;
 
-  const solapaAbierta = fase === "apertura" || fase === "titulo";
-  const sellosRoto = fase === "apertura" || fase === "titulo";
-  const cartaAsomada = fase === "apertura";
-  const cartaRevelada = fase === "titulo";
+  const showEnvelope = fase === "sobre" || fase === "sello" || fase === "apertura";
+  const showSeal = fase === "sello" || fase === "apertura";
+  const sealBreaking = fase === "apertura";
+  const showFlapOpen = fase === "apertura" || fase === "revelacion";
+  const showLetter = fase === "apertura" || fase === "revelacion";
+  const letterRevealed = fase === "revelacion";
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-olive-fade"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+      style={{
+        background: "linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 40%, #2d2d2d 100%)",
+      }}
       role="button"
       tabIndex={0}
       aria-label="Toca para continuar a la invitación"
       onClick={handleSkip}
       onKeyDown={(e) => e.key === "Enter" && handleSkip()}
       animate={saliendo ? { opacity: 0 } : { opacity: 1 }}
-      transition={{ duration: DURACION_SALIDA, ease: "easeInOut" }}
+      transition={{ duration: 1.2, ease: "easeInOut" }}
       onAnimationComplete={() => {
         if (saliendo) onFinished();
       }}
     >
-      {/* Fondo: viñeta + ramitas de olivo flotando + resplandor suave */}
+      {/* Background effects */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(62,71,50,0.55)_100%)]" />
-        <div className="absolute -left-6 top-10 h-40 w-40 animate-drift rounded-full bg-champagne/30 blur-3xl" />
-        <div className="absolute bottom-10 right-0 h-48 w-48 animate-drift rounded-full bg-alabaster/20 blur-3xl [animation-delay:2s]" />
-        <RamitaFlotante className="left-[8%] top-[14%]" delay={0.2} />
-        <RamitaFlotante className="right-[10%] top-[20%] rotate-[130deg]" delay={0.8} />
-        <RamitaFlotante className="bottom-[16%] left-[14%] rotate-[220deg]" delay={0.5} />
-        <RamitaFlotante className="bottom-[12%] right-[8%] rotate-[60deg]" delay={1.1} />
-      </div>
-
-      <p className="eyebrow absolute top-[14%] text-champagne/80">Nos casamos</p>
-
-      {/* El sobre: contenedor con perspectiva 3D para que la solapa "gire" de verdad */}
-      <div className="relative h-48 w-64 sm:h-56 sm:w-80" style={{ perspective: 1400 }}>
-        {/* Cuerpo del sobre */}
+        {/* Vignette */}
+        <div className="absolute inset-0 bg-dark-vignette" />
+        {/* Floating particles */}
+        <ParticleField count={40} color="rgba(231,219,203,0.4)" />
+        {/* Ambient glow */}
         <motion.div
-          className="absolute inset-0 overflow-hidden rounded-sm bg-champagne shadow-soft"
-          initial={{ opacity: 0, y: 20, scale: 0.92 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          {/* Líneas de pliegue del sobre, para que se lea como sobre y no como caja */}
-          <svg viewBox="0 0 256 176" className="absolute inset-0 h-full w-full text-olive/15" preserveAspectRatio="none">
-            <path d="M0 0 L128 96 L256 0" stroke="currentColor" strokeWidth="1.5" fill="none" />
-            <path d="M0 176 L96 88" stroke="currentColor" strokeWidth="1.5" fill="none" />
-            <path d="M256 176 L160 88" stroke="currentColor" strokeWidth="1.5" fill="none" />
-          </svg>
-        </motion.div>
-
-        {/* Carta: sale de adentro del sobre y crece para revelar los nombres */}
-        <motion.div
-          className="absolute inset-x-3 top-2 flex flex-col items-center justify-center rounded-sm bg-alabaster px-4 py-6 text-center shadow-card sm:inset-x-4"
-          style={{ zIndex: 30 }}
-          initial={{ y: 0, opacity: 0, scale: 0.94 }}
-          animate={
-            cartaRevelada
-              ? { y: "-46vh", opacity: 1, scale: 2.6 }
-              : cartaAsomada
-                ? { y: "-38%", opacity: 1, scale: 1 }
-                : { y: 0, opacity: 0, scale: 0.94 }
-          }
-          transition={{ duration: cartaRevelada ? 1.6 : 0.9, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <motion.p
-            className="eyebrow text-pistachio-600"
-            animate={{ opacity: cartaRevelada ? 1 : 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            Con todo nuestro amor, los esperamos
-          </motion.p>
-          <motion.h1
-            className="font-display text-2xl italic text-olive-900 sm:text-3xl"
-            animate={{ opacity: cartaAsomada || cartaRevelada ? 1 : 0, letterSpacing: cartaRevelada ? "0.02em" : "0.3em" }}
-            transition={{ duration: 0.9, ease: "easeOut" }}
-          >
-            {novios}
-          </motion.h1>
-        </motion.div>
-
-        {/* Solapa del sobre: triángulo real que gira sobre su borde superior */}
-        <motion.div
-          className="absolute inset-x-0 top-0 origin-top bg-champagne-300 shadow-soft"
+          className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{
-            height: "62%",
-            clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-            zIndex: 20,
-            transformStyle: "preserve-3d",
-            backfaceVisibility: "hidden",
+            background: "radial-gradient(circle, rgba(130,134,97,0.15) 0%, transparent 70%)",
           }}
-          initial={{ rotateX: 0 }}
-          animate={{ rotateX: solapaAbierta ? -175 : 0 }}
-          transition={{ duration: 1.1, ease: "easeInOut" }}
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
-
-        {/* Sello de cera: se agrieta y se parte al pasar a "sello" */}
-        <motion.div
-          className="absolute left-1/2 top-[38%] -translate-x-1/2"
-          style={{ zIndex: 25 }}
-          initial={{ opacity: 1, scale: 1, rotate: 0 }}
-          animate={
-            sellosRoto
-              ? { opacity: 0, scale: 1.5, rotate: 12, transition: { duration: 0.5, ease: "easeIn" } }
-              : fase === "sello"
-                ? { rotate: [0, -6, 6, -4, 0], scale: [1, 1.08, 1, 1.05, 1] }
-                : { opacity: 1, scale: 1, rotate: 0 }
-          }
-          transition={fase === "sello" && !sellosRoto ? { duration: 0.9, ease: "easeInOut" } : undefined}
-        >
-          <WaxSeal size={64} />
-        </motion.div>
+        {/* Olive sprigs */}
+        <OliveSprig className="left-[6%] top-[12%]" delay={0.5} />
+        <OliveSprig className="right-[8%] top-[18%] rotate-[130deg]" delay={1.0} />
+        <OliveSprig className="bottom-[14%] left-[12%] rotate-[220deg]" delay={0.8} />
+        <OliveSprig className="bottom-[10%] right-[6%] rotate-[60deg]" delay={1.3} />
       </div>
 
-      <button
+      {/* Top text */}
+      <motion.p
+        className="eyebrow absolute top-[12%] text-champagne/60"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: fase !== "oscuridad" ? 1 : 0, y: fase !== "oscuridad" ? 0 : -20 }}
+        transition={{ duration: 1, delay: 0.3 }}
+      >
+        Nos casamos
+      </motion.p>
+
+      {/* Main content container */}
+      <div className="relative" style={{ perspective: 1600 }}>
+        {/* Envelope body */}
+        <AnimatePresence>
+          {showEnvelope && (
+            <motion.div
+              className="relative h-52 w-72 overflow-hidden rounded-sm sm:h-60 sm:w-80"
+              style={{
+                background: "linear-gradient(135deg, #E7DBCB 0%, #DDD0B8 50%, #D4C4A8 100%)",
+                boxShadow: "0 30px 80px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2)",
+              }}
+              initial={{ opacity: 0, y: 40, scale: 0.85, rotateX: 10 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Envelope texture lines */}
+              <svg viewBox="0 0 256 176" className="absolute inset-0 h-full w-full text-olive/10" preserveAspectRatio="none">
+                <path d="M0 0 L128 96 L256 0" stroke="currentColor" strokeWidth="1" fill="none" />
+                <path d="M0 176 L96 88" stroke="currentColor" strokeWidth="1" fill="none" />
+                <path d="M256 176 L160 88" stroke="currentColor" strokeWidth="1" fill="none" />
+              </svg>
+
+              {/* Inner shadow for depth */}
+              <div className="absolute inset-0 shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)]" />
+
+              {/* Letter inside */}
+              <motion.div
+                className="absolute inset-x-4 top-3 flex flex-col items-center justify-center rounded-sm bg-alabaster px-4 py-6 text-center shadow-lg sm:inset-x-5"
+                style={{ zIndex: 30 }}
+                initial={{ y: 0, opacity: 0, scale: 0.94 }}
+                animate={
+                  letterRevealed
+                    ? { y: "-50vh", opacity: 1, scale: 3 }
+                    : showLetter
+                      ? { y: "-40%", opacity: 1, scale: 1.05 }
+                      : { y: 0, opacity: 0, scale: 0.94 }
+                }
+                transition={{
+                  duration: letterRevealed ? 2 : 1,
+                  ease: letterRevealed ? [0.22, 1, 0.36, 1] : "easeOut",
+                }}
+              >
+                <motion.p
+                  className="eyebrow text-pistachio-500"
+                  animate={{ opacity: letterRevealed ? 1 : 0 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                >
+                  Con todo nuestro amor, los esperamos
+                </motion.p>
+                <motion.h1
+                  className="font-display text-3xl font-light italic text-olive-900 sm:text-4xl"
+                  animate={{
+                    opacity: showLetter ? 1 : 0,
+                    letterSpacing: letterRevealed ? "0.02em" : "0.15em",
+                  }}
+                  transition={{ duration: 1.2, ease: "easeOut" }}
+                >
+                  {novios}
+                </motion.h1>
+              </motion.div>
+
+              {/* Envelope flap */}
+              <motion.div
+                className="absolute inset-x-0 top-0 origin-top"
+                style={{
+                  height: "62%",
+                  clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+                  zIndex: 20,
+                  transformStyle: "preserve-3d",
+                  backfaceVisibility: "hidden",
+                  background: "linear-gradient(180deg, #D4C4A8 0%, #E7DBCB 100%)",
+                }}
+                initial={{ rotateX: 0 }}
+                animate={{ rotateX: showFlapOpen ? -175 : 0 }}
+                transition={{ duration: 1.4, ease: "easeInOut" }}
+              />
+
+              {/* Wax seal */}
+              <AnimatePresence>
+                {showSeal && (
+                  <motion.div
+                    className="absolute left-1/2 top-[38%] -translate-x-1/2"
+                    style={{ zIndex: 25 }}
+                    initial={{ opacity: 1, scale: 1, rotate: 0 }}
+                    animate={
+                      sealBreaking
+                        ? {
+                            opacity: 0,
+                            scale: 1.8,
+                            rotate: 15,
+                            transition: { duration: 0.6, ease: "easeIn" },
+                          }
+                        : {
+                            rotate: [0, -8, 8, -5, 0],
+                            scale: [1, 1.1, 1, 1.05, 1],
+                          }
+                    }
+                    transition={
+                      fase === "sello"
+                        ? { duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }
+                        : undefined
+                    }
+                  >
+                    <WaxSeal size={72} animated={false} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Skip button */}
+      <motion.button
         onClick={(e) => {
           e.stopPropagation();
           handleSkip();
         }}
-        className="absolute bottom-8 font-body text-xs uppercase tracking-widest2 text-alabaster/70 underline-offset-4 hover:underline"
+        className="absolute bottom-8 font-body text-xs uppercase tracking-widest2 text-alabaster/50 underline-offset-4 transition-colors hover:text-alabaster/80 hover:underline"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 1 }}
       >
         Omitir
-      </button>
+      </motion.button>
+
+      {/* Bottom decorative line */}
+      <motion.div
+        className="absolute bottom-16 left-1/2 h-px -translate-x-1/2 bg-gradient-to-r from-transparent via-champagne/30 to-transparent"
+        initial={{ width: 0 }}
+        animate={{ width: "200px" }}
+        transition={{ delay: 1, duration: 2, ease: "easeOut" }}
+      />
     </motion.div>
   );
 }
