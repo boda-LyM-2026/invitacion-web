@@ -14,7 +14,7 @@ export default function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-cinematic-dark">
+      <div className="flex min-h-screen items-center justify-center bg-alabaster">
         <motion.div
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -30,17 +30,17 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-cinematic-dark">
+    <div className="min-h-screen bg-alabaster">
       {/* Header */}
-      <header className="border-b border-white/10 bg-cinematic-dark/80 backdrop-blur-md">
+      <header className="border-b border-pistachio-200/50 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <WaxSeal size={36} animated={false} />
             <div>
-              <p className="font-display text-lg font-light italic text-alabaster">
+              <p className="font-display text-lg font-light italic text-olive-900">
                 Lenan &amp; Mauricio
               </p>
-              <p className="font-body text-xs uppercase tracking-widest2 text-alabaster/50">
+              <p className="font-body text-xs uppercase tracking-widest2 text-ink-muted">
                 Panel administrativo
               </p>
             </div>
@@ -55,8 +55,8 @@ export default function AdminLayout() {
                 className={({ isActive }) =>
                   `font-body text-sm transition-colors duration-300 ${
                     isActive
-                      ? "text-alabaster"
-                      : "text-alabaster/50 hover:text-alabaster/80"
+                      ? "text-olive-900"
+                      : "text-ink-muted hover:text-olive-700"
                   }`
                 }
               >
@@ -75,7 +75,7 @@ export default function AdminLayout() {
             ))}
             <motion.button
               onClick={() => void signOut()}
-              className="font-body text-sm text-alabaster/50 transition-colors hover:text-champagne"
+              className="font-body text-sm text-ink-muted transition-colors hover:text-champagne-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

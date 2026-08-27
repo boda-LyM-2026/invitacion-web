@@ -15,7 +15,7 @@ export function Hero({ nombreInvitado }: HeroProps) {
   const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
 
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-end overflow-hidden bg-cinematic-black text-alabaster">
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-cinematic-black text-alabaster">
       {/* Parallax background image */}
       <motion.div className="absolute inset-0" style={{ y, scale }}>
         <img
@@ -49,7 +49,7 @@ export function Hero({ nombreInvitado }: HeroProps) {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 px-6 pb-20 text-center"
+        className="relative z-10 px-6 text-center"
         style={{ opacity }}
       >
         {/* Personalized greeting */}

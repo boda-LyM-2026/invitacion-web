@@ -11,7 +11,7 @@ export default function DashboardPage() {
   if (kpisLoading || gruposLoading || !kpis) {
     return (
       <motion.p
-        className="text-alabaster/50"
+        className="text-ink-muted"
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
@@ -27,8 +27,8 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <h1 className="font-display text-3xl font-light italic text-alabaster">Resumen</h1>
-        <p className="mt-1 font-body text-sm text-alabaster/50">
+        <h1 className="font-display text-3xl font-light italic text-olive-900">Resumen</h1>
+        <p className="mt-1 font-body text-sm text-ink-muted">
           Estado actual de las confirmaciones, en tiempo real.
         </p>
       </motion.div>

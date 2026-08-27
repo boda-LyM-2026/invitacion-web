@@ -5,14 +5,12 @@ import { OliveDivider } from "@/components/shared/OliveDivider";
 export function FormalInvitation() {
   return (
     <section className="section-cinematic film-grain">
-      {/* Background */}
+      {/* Background image */}
       <div
-        className="absolute inset-0"
-        style={{
-          background: "radial-gradient(120% 120% at 50% 0%, #F9F9EF 0%, #E7DBCB 45%, #CDD2BC 100%)",
-        }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/tarjetas-con-nombres-invitados.jpg')" }}
       />
-      <div className="absolute inset-0 bg-olive-vignette" />
+      <div className="absolute inset-0 bg-alabaster/90 backdrop-blur-sm" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="blur-in">

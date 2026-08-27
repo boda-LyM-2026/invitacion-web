@@ -9,14 +9,12 @@ interface ThankYouScreenProps {
 export function ThankYouScreen({ nombreInvitado }: ThankYouScreenProps) {
   return (
     <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-6 text-center">
-      {/* Background */}
+      {/* Background image */}
       <div
-        className="absolute inset-0"
-        style={{
-          background: "radial-gradient(120% 120% at 50% 0%, #F9F9EF 0%, #E7DBCB 45%, #CDD2BC 100%)",
-        }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/ramo-de-flores.jpg')" }}
       />
-      <div className="absolute inset-0 bg-olive-vignette" />
+      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
 
       {/* Particles dispersing */}
       <ParticleField count={35} color="rgba(130,134,97,0.4)" />

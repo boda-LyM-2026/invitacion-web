@@ -52,15 +52,15 @@ export default function GuestsPage() {
         transition={{ duration: 0.8 }}
       >
         <div>
-          <h1 className="font-display text-3xl font-light italic text-alabaster">Invitados</h1>
-          <p className="mt-1 font-body text-sm text-alabaster/50">
+          <h1 className="font-display text-3xl font-light italic text-olive-900">Invitados</h1>
+          <p className="mt-1 font-body text-sm text-ink-muted">
             {filtrados.length} grupos mostrados de {grupos.length}
           </p>
         </div>
         <div className="flex gap-2">
           <motion.button
             onClick={() => exportarExcel(filtrados)}
-            className="rounded-lg border border-alabaster/20 px-4 py-2 font-body text-xs uppercase tracking-wider text-alabaster/70 transition-colors hover:border-alabaster/40 hover:text-alabaster"
+            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -68,7 +68,7 @@ export default function GuestsPage() {
           </motion.button>
           <motion.button
             onClick={() => exportarCsv(filtrados)}
-            className="rounded-lg border border-alabaster/20 px-4 py-2 font-body text-xs uppercase tracking-wider text-alabaster/70 transition-colors hover:border-alabaster/40 hover:text-alabaster"
+            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -76,7 +76,7 @@ export default function GuestsPage() {
           </motion.button>
           <motion.button
             onClick={() => exportarPdf(filtrados)}
-            className="rounded-lg border border-alabaster/20 px-4 py-2 font-body text-xs uppercase tracking-wider text-alabaster/70 transition-colors hover:border-alabaster/40 hover:text-alabaster"
+            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -87,7 +87,7 @@ export default function GuestsPage() {
               setGrupoEditando(null);
               setModalAbierto(true);
             }}
-            className="rounded-lg bg-olive px-4 py-2 font-body text-xs uppercase tracking-wider text-alabaster shadow-glow-olive transition-all hover:bg-olive-500"
+            className="rounded-lg bg-olive px-4 py-2 font-body text-xs uppercase tracking-wider text-alabaster shadow-soft transition-all hover:bg-olive-500"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -106,7 +106,7 @@ export default function GuestsPage() {
         <select
           value={categoria}
           onChange={(e) => setCategoria(e.target.value as typeof categoria)}
-          className="rounded-lg border border-alabaster/20 bg-cinematic-dark px-4 py-2 font-body text-sm text-alabaster focus:border-olive focus:outline-none"
+          className="rounded-lg border border-pistachio-200 bg-white px-4 py-2 font-body text-sm text-ink focus:border-olive focus:outline-none"
         >
           {CATEGORIAS.map((c) => (
             <option key={c} value={c}>
@@ -117,7 +117,7 @@ export default function GuestsPage() {
         <select
           value={estado}
           onChange={(e) => setEstado(e.target.value as typeof estado)}
-          className="rounded-lg border border-alabaster/20 bg-cinematic-dark px-4 py-2 font-body text-sm text-alabaster focus:border-olive focus:outline-none"
+          className="rounded-lg border border-pistachio-200 bg-white px-4 py-2 font-body text-sm text-ink focus:border-olive focus:outline-none"
         >
           {ESTADOS.map((e) => (
             <option key={e} value={e}>
@@ -129,7 +129,7 @@ export default function GuestsPage() {
 
       {loading ? (
         <motion.p
-          className="text-alabaster/50"
+          className="text-ink-muted"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >

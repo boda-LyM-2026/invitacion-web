@@ -17,9 +17,12 @@ export function LocationSection() {
 
   return (
     <section className="section-cinematic film-grain">
-      {/* Background */}
-      <div className="absolute inset-0 bg-alabaster" />
-      <div className="absolute inset-0 bg-champagne-glow" />
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-1.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">

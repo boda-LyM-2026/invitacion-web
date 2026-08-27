@@ -9,9 +9,9 @@ interface GuestsTableProps {
 }
 
 const BADGE: Record<GrupoInvitacion["estado"], string> = {
-  confirmed: "bg-olive/20 text-alabaster border-olive/30",
-  pending: "bg-champagne/20 text-champagne border-champagne/30",
-  declined: "bg-alabaster/10 text-alabaster/60 border-alabaster/20",
+  confirmed: "bg-pistachio-100 text-pistachio-700 border-pistachio-300",
+  pending: "bg-champagne-200 text-olive-700 border-champagne-300",
+  declined: "bg-pistachio-50 text-ink-muted border-pistachio-200",
 };
 
 const ETIQUETA: Record<GrupoInvitacion["estado"], string> = {
@@ -34,15 +34,15 @@ export function GuestsTable({ grupos, onEditar, onEliminar }: GuestsTableProps) 
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-alabaster/10 bg-alabaster/5 backdrop-blur-sm">
-      <table className="min-w-full divide-y divide-alabaster/10 text-left text-sm">
-        <thead className="bg-alabaster/5">
+    <div className="overflow-x-auto rounded-2xl border border-pistachio-200/50 bg-white shadow-soft">
+      <table className="min-w-full divide-y divide-pistachio-200/50 text-left text-sm">
+        <thead className="bg-pistachio-50">
           <tr>
             {["Grupo", "Invitado principal", "Personas", "Estado", "Mesa", "Acciones"].map(
               (header) => (
                 <th
                   key={header}
-                  className={`px-4 py-3 font-body text-xs uppercase tracking-wider text-alabaster/50 ${
+                  className={`px-4 py-3 font-body text-xs uppercase tracking-wider text-ink-muted ${
                     header === "Acciones" ? "text-right" : ""
                   }`}
                 >
@@ -52,18 +52,18 @@ export function GuestsTable({ grupos, onEditar, onEliminar }: GuestsTableProps) 
             )}
           </tr>
         </thead>
-        <tbody className="divide-y divide-alabaster/5">
+        <tbody className="divide-y divide-pistachio-100">
           {grupos.map((g, i) => (
             <motion.tr
               key={g.id}
-              className="transition-colors hover:bg-alabaster/5"
+              className="transition-colors hover:bg-pistachio-50/50"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
             >
-              <td className="px-4 py-3 font-medium text-alabaster">{g.nombre_grupo}</td>
-              <td className="px-4 py-3 text-alabaster/80">{g.invitado_principal}</td>
-              <td className="px-4 py-3 text-alabaster/80">{g.limite_personas}</td>
+              <td className="px-4 py-3 font-medium text-olive-900">{g.nombre_grupo}</td>
+              <td className="px-4 py-3 text-ink-light">{g.invitado_principal}</td>
+              <td className="px-4 py-3 text-ink-light">{g.limite_personas}</td>
               <td className="px-4 py-3">
                 <span
                   className={`rounded-full border px-2.5 py-1 text-xs font-medium ${BADGE[g.estado]}`}
@@ -71,25 +71,25 @@ export function GuestsTable({ grupos, onEditar, onEliminar }: GuestsTableProps) 
                   {ETIQUETA[g.estado]}
                 </span>
               </td>
-              <td className="px-4 py-3 text-alabaster/80">
+              <td className="px-4 py-3 text-ink-light">
                 {g.mesa?.nombre ?? (g.mesa?.numero ? `Mesa ${g.mesa.numero}` : "—")}
               </td>
               <td className="px-4 py-3 text-right">
                 <button
                   onClick={() => void copiarEnlace(g)}
-                  className="mr-3 text-alabaster/50 transition-colors hover:text-olive hover:underline"
+                  className="mr-3 text-ink-muted transition-colors hover:text-olive-700 hover:underline"
                 >
                   {copiadoId === g.id ? "¡Copiado!" : "Copiar enlace"}
                 </button>
                 <button
                   onClick={() => onEditar(g)}
-                  className="mr-3 text-olive transition-colors hover:underline"
+                  className="mr-3 text-pistachio-600 transition-colors hover:underline"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => onEliminar(g)}
-                  className="text-champagne transition-colors hover:underline"
+                  className="text-champagne-300 transition-colors hover:underline"
                 >
                   Eliminar
                 </button>
@@ -98,7 +98,7 @@ export function GuestsTable({ grupos, onEditar, onEliminar }: GuestsTableProps) 
           ))}
           {grupos.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-alabaster/30">
+              <td colSpan={6} className="px-4 py-8 text-center text-ink-muted/50">
                 No hay grupos que coincidan con el filtro.
               </td>
             </tr>

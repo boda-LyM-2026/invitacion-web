@@ -12,9 +12,12 @@ const REGLAS = [
 export function CodeOfConduct() {
   return (
     <section className="section-cinematic film-grain">
-      {/* Background */}
-      <div className="absolute inset-0 bg-alabaster" />
-      <div className="absolute inset-0 bg-champagne-glow" />
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/herramientas-para-cortar-pastel.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">

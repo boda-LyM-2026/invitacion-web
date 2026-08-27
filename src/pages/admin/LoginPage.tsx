@@ -3,7 +3,6 @@ import { Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { WaxSeal } from "@/components/shared/WaxSeal";
-import { ParticleField } from "@/components/shared/ParticleField";
 
 export default function LoginPage() {
   const { session, signIn } = useAuth();
@@ -24,16 +23,7 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
       {/* Background */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%)",
-        }}
-      />
-      <div className="absolute inset-0 bg-olive-vignette" />
-
-      {/* Particles */}
-      <ParticleField count={25} color="rgba(231,219,203,0.3)" />
+      <div className="absolute inset-0 bg-leaf-fade" />
 
       {/* Form */}
       <motion.form
@@ -43,19 +33,19 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="glass-card p-8">
+        <div className="card-surface p-8">
           <WaxSeal size={56} className="mx-auto mb-6" />
 
-          <h1 className="text-center font-display text-2xl font-light italic text-alabaster">
+          <h1 className="text-center font-display text-2xl font-light italic text-olive-900">
             Panel de Lenan &amp; Mauricio
           </h1>
-          <p className="mt-2 text-center font-body text-xs uppercase tracking-widest2 text-alabaster/50">
+          <p className="mt-2 text-center font-body text-xs uppercase tracking-widest2 text-ink-muted">
             Acceso solo para los novios y organizadores
           </p>
 
           <div className="mt-8 space-y-4">
             <div>
-              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-alabaster/50">
+              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
                 Correo
               </label>
               <input
@@ -64,11 +54,11 @@ export default function LoginPage() {
                 placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-alabaster/20 bg-alabaster/10 px-4 py-3 font-body text-sm text-alabaster placeholder:text-alabaster/30 focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/30 transition-all duration-300"
+                className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
               />
             </div>
             <div>
-              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-alabaster/50">
+              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
                 Contraseña
               </label>
               <input
@@ -77,14 +67,14 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-alabaster/20 bg-alabaster/10 px-4 py-3 font-body text-sm text-alabaster placeholder:text-alabaster/30 focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/30 transition-all duration-300"
+                className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
               />
             </div>
           </div>
 
           {error && (
             <motion.p
-              className="mt-4 text-center font-body text-sm text-champagne"
+              className="mt-4 text-center font-body text-sm text-champagne-300"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -95,7 +85,7 @@ export default function LoginPage() {
           <motion.button
             type="submit"
             disabled={enviando}
-            className="mt-8 w-full rounded-xl bg-olive py-3 font-body text-sm uppercase tracking-[0.18em] text-alabaster shadow-glow-olive transition-all duration-500 hover:bg-olive-500 hover:shadow-glow-olive disabled:opacity-50"
+            className="mt-8 w-full rounded-xl bg-olive py-3 font-body text-sm uppercase tracking-[0.18em] text-alabaster shadow-soft transition-all duration-500 hover:bg-olive-500 disabled:opacity-50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >

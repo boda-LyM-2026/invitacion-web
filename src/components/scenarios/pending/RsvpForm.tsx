@@ -61,11 +61,10 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
     return (
       <section id="rsvp" className="section-cinematic relative overflow-hidden">
         <div
-          className="absolute inset-0"
-          style={{
-            background: "linear-gradient(180deg, #828661 0%, #6B6F4E 50%, #4B523C 100%)",
-          }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/images/mesa-fondo-jardin-1.jpg')" }}
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
         <motion.div
           className="relative z-10 flex min-h-[50vh] flex-col items-center justify-center text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -93,14 +92,12 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
 
   return (
     <section id="rsvp" className="section-cinematic relative overflow-hidden">
-      {/* Background */}
+      {/* Background image */}
       <div
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(180deg, #828661 0%, #6B6F4E 50%, #4B523C 100%)",
-        }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-2.jpg')" }}
       />
-      <div className="absolute inset-0 bg-olive-vignette" />
+      <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">

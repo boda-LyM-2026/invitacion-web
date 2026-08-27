@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { WaxSeal } from "@/components/shared/WaxSeal";
 import { ParticleField } from "@/components/shared/ParticleField";
 
 interface IntroSequenceProps {
@@ -21,46 +20,101 @@ const DURACIONES: Record<Fase, number> = {
 
 const ORDEN: Fase[] = ["oscuridad", "sobre", "sello", "apertura", "revelacion", "salida"];
 
-function OliveSprig({ className, delay = 0 }: { className: string; delay?: number }) {
+function GoldenSealLM({ size = 80 }: { size?: number }) {
   return (
-    <motion.svg
+    <svg
+      width={size}
+      height={size}
       viewBox="0 0 80 80"
-      className={`pointer-events-none absolute h-20 w-20 text-champagne/20 sm:h-24 sm:w-24 ${className}`}
       fill="none"
-      aria-hidden="true"
-      initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        rotate: 0,
-        y: [0, -15, 0],
-      }}
-      transition={{
-        opacity: { duration: 1.5, delay },
-        scale: { duration: 1.5, delay },
-        rotate: { duration: 1.5, delay },
-        y: { duration: 8, repeat: Infinity, ease: "easeInOut", delay },
-      }}
+      xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M40 6 C 34 20, 46 28, 40 42 C 34 56, 46 64, 40 76"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
+      {/* Outer wax circle */}
+      <circle cx="40" cy="40" r="38" fill="#8B6914" opacity="0.9" />
+      <circle cx="40" cy="40" r="36" fill="#B8860B" />
+      <circle
+        cx="40"
+        cy="40"
+        r="34"
+        fill="url(#goldGradient)"
+        stroke="#6B4C12"
+        strokeWidth="0.5"
       />
-      {[18, 32, 48, 62].map((y, i) => (
-        <motion.path
-          key={y}
-          d={i % 2 === 0 ? `M40 ${y} q -12 -5 -16 2` : `M40 ${y} q 12 -5 16 2`}
-          stroke="currentColor"
-          strokeWidth="1"
-          strokeLinecap="round"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.8, delay: delay + 0.3 + i * 0.1 }}
-        />
-      ))}
-    </motion.svg>
+      {/* Inner decorative ring */}
+      <circle
+        cx="40"
+        cy="40"
+        r="28"
+        fill="none"
+        stroke="#6B4C12"
+        strokeWidth="0.8"
+        opacity="0.5"
+      />
+      <circle
+        cx="40"
+        cy="40"
+        r="26"
+        fill="none"
+        stroke="#F5D060"
+        strokeWidth="0.3"
+        opacity="0.7"
+      />
+      {/* L */}
+      <text
+        x="26"
+        y="46"
+        fontFamily="Cormorant Garamond, Georgia, serif"
+        fontSize="22"
+        fontWeight="300"
+        fontStyle="italic"
+        fill="#3D2B1F"
+        opacity="0.85"
+      >
+        L
+      </text>
+      {/* Ampersand */}
+      <text
+        x="36"
+        y="40"
+        fontFamily="Cormorant Garamond, Georgia, serif"
+        fontSize="11"
+        fontWeight="300"
+        fill="#3D2B1F"
+        opacity="0.6"
+      >
+        &amp;
+      </text>
+      {/* M */}
+      <text
+        x="43"
+        y="46"
+        fontFamily="Cormorant Garamond, Georgia, serif"
+        fontSize="22"
+        fontWeight="300"
+        fontStyle="italic"
+        fill="#3D2B1F"
+        opacity="0.85"
+      >
+        M
+      </text>
+      {/* Shine effect */}
+      <ellipse
+        cx="32"
+        cy="30"
+        rx="10"
+        ry="6"
+        fill="white"
+        opacity="0.15"
+        transform="rotate(-20 32 30)"
+      />
+      <defs>
+        <radialGradient id="goldGradient" cx="0.35" cy="0.35" r="0.65">
+          <stop offset="0%" stopColor="#F5E6A3" />
+          <stop offset="50%" stopColor="#DAA520" />
+          <stop offset="100%" stopColor="#B8860B" />
+        </radialGradient>
+      </defs>
+    </svg>
   );
 }
 
@@ -124,11 +178,8 @@ export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: Intro
     >
       {/* Background effects */}
       <div className="pointer-events-none absolute inset-0">
-        {/* Vignette */}
         <div className="absolute inset-0 bg-dark-vignette" />
-        {/* Floating particles */}
         <ParticleField count={40} color="rgba(231,219,203,0.4)" />
-        {/* Ambient glow */}
         <motion.div
           className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{
@@ -140,11 +191,6 @@ export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: Intro
           }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
-        {/* Olive sprigs */}
-        <OliveSprig className="left-[6%] top-[12%]" delay={0.5} />
-        <OliveSprig className="right-[8%] top-[18%] rotate-[130deg]" delay={1.0} />
-        <OliveSprig className="bottom-[14%] left-[12%] rotate-[220deg]" delay={0.8} />
-        <OliveSprig className="bottom-[10%] right-[6%] rotate-[60deg]" delay={1.3} />
       </div>
 
       {/* Top text */}
@@ -163,55 +209,103 @@ export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: Intro
         <AnimatePresence>
           {showEnvelope && (
             <motion.div
-              className="relative h-52 w-72 overflow-hidden rounded-sm sm:h-60 sm:w-80"
+              className="relative h-56 w-80 overflow-hidden sm:h-64 sm:w-96"
               style={{
-                background: "linear-gradient(135deg, #E7DBCB 0%, #DDD0B8 50%, #D4C4A8 100%)",
-                boxShadow: "0 30px 80px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2)",
+                borderRadius: "4px",
+                boxShadow: "0 30px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(231,219,203,0.1)",
               }}
               initial={{ opacity: 0, y: 40, scale: 0.85, rotateX: 10 }}
               animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             >
-              {/* Envelope texture lines */}
-              <svg viewBox="0 0 256 176" className="absolute inset-0 h-full w-full text-olive/10" preserveAspectRatio="none">
-                <path d="M0 0 L128 96 L256 0" stroke="currentColor" strokeWidth="1" fill="none" />
-                <path d="M0 176 L96 88" stroke="currentColor" strokeWidth="1" fill="none" />
-                <path d="M256 176 L160 88" stroke="currentColor" strokeWidth="1" fill="none" />
-              </svg>
+              {/* Envelope outer - cream/beige paper */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: "linear-gradient(145deg, #E8DCC8 0%, #DDD0B8 40%, #D4C4A8 100%)",
+                }}
+              />
 
-              {/* Inner shadow for depth */}
-              <div className="absolute inset-0 shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)]" />
+              {/* Subtle paper texture */}
+              <div
+                className="absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+                }}
+              />
+
+              {/* Envelope flap triangle */}
+              <motion.div
+                className="absolute inset-x-0 top-0 origin-top"
+                style={{
+                  height: "58%",
+                  clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+                  zIndex: 20,
+                  transformStyle: "preserve-3d",
+                  backfaceVisibility: "hidden",
+                  background: "linear-gradient(180deg, #CFC0A6 0%, #DDD0B8 100%)",
+                }}
+                initial={{ rotateX: 0 }}
+                animate={{ rotateX: showFlapOpen ? -175 : 0 }}
+                transition={{ duration: 1.4, ease: "easeInOut" }}
+              >
+                {/* Flap inner shadow */}
+                <div className="absolute inset-0 shadow-[inset_0_-4px_12px_rgba(0,0,0,0.15)]" />
+              </motion.div>
+
+              {/* Inner lining - slightly lighter, visible when open */}
+              <div
+                className="absolute inset-0 rounded-[2px]"
+                style={{
+                  background: "linear-gradient(180deg, #F5F0E6 0%, #EDE5D5 100%)",
+                  zIndex: 2,
+                }}
+              />
+
+              {/* Inner shadow for depth when closed */}
+              <motion.div
+                className="absolute inset-0"
+                style={{
+                  boxShadow: "inset 0 2px 15px rgba(0,0,0,0.08)",
+                  zIndex: 3,
+                }}
+                animate={{ opacity: showFlapOpen ? 0 : 1 }}
+                transition={{ duration: 0.8 }}
+              />
 
               {/* Letter inside */}
               <motion.div
-                className="absolute inset-x-4 top-3 flex flex-col items-center justify-center rounded-sm bg-alabaster px-4 py-6 text-center shadow-lg sm:inset-x-5"
-                style={{ zIndex: 30 }}
+                className="absolute inset-x-4 top-4 flex flex-col items-center justify-center rounded-sm bg-white px-4 py-8 text-center sm:inset-x-5"
+                style={{
+                  zIndex: 30,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                }}
                 initial={{ y: 0, opacity: 0, scale: 0.94 }}
                 animate={
                   letterRevealed
-                    ? { y: "-50vh", opacity: 1, scale: 3 }
+                    ? { y: "-55vh", opacity: 1, scale: 3.5 }
                     : showLetter
-                      ? { y: "-40%", opacity: 1, scale: 1.05 }
+                      ? { y: "-35%", opacity: 1, scale: 1.02 }
                       : { y: 0, opacity: 0, scale: 0.94 }
                 }
                 transition={{
-                  duration: letterRevealed ? 2 : 1,
+                  duration: letterRevealed ? 2.2 : 1,
                   ease: letterRevealed ? [0.22, 1, 0.36, 1] : "easeOut",
                 }}
               >
                 <motion.p
-                  className="eyebrow text-pistachio-500"
+                  className="eyebrow text-ink-muted/60"
                   animate={{ opacity: letterRevealed ? 1 : 0 }}
                   transition={{ delay: 0.5, duration: 0.8 }}
                 >
                   Con todo nuestro amor, los esperamos
                 </motion.p>
                 <motion.h1
-                  className="font-display text-3xl font-light italic text-olive-900 sm:text-4xl"
+                  className="mt-3 font-display text-3xl font-light italic text-olive-900 sm:text-4xl"
                   animate={{
                     opacity: showLetter ? 1 : 0,
-                    letterSpacing: letterRevealed ? "0.02em" : "0.15em",
+                    letterSpacing: letterRevealed ? "0.02em" : "0.12em",
                   }}
                   transition={{ duration: 1.2, ease: "easeOut" }}
                 >
@@ -219,23 +313,7 @@ export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: Intro
                 </motion.h1>
               </motion.div>
 
-              {/* Envelope flap */}
-              <motion.div
-                className="absolute inset-x-0 top-0 origin-top"
-                style={{
-                  height: "62%",
-                  clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-                  zIndex: 20,
-                  transformStyle: "preserve-3d",
-                  backfaceVisibility: "hidden",
-                  background: "linear-gradient(180deg, #D4C4A8 0%, #E7DBCB 100%)",
-                }}
-                initial={{ rotateX: 0 }}
-                animate={{ rotateX: showFlapOpen ? -175 : 0 }}
-                transition={{ duration: 1.4, ease: "easeInOut" }}
-              />
-
-              {/* Wax seal */}
+              {/* Golden LM Seal */}
               <AnimatePresence>
                 {showSeal && (
                   <motion.div
@@ -246,22 +324,22 @@ export function IntroSequence({ onFinished, novios = "Lenan & Mauricio" }: Intro
                       sealBreaking
                         ? {
                             opacity: 0,
-                            scale: 1.8,
-                            rotate: 15,
-                            transition: { duration: 0.6, ease: "easeIn" },
+                            scale: 2,
+                            rotate: 20,
+                            transition: { duration: 0.8, ease: "easeIn" },
                           }
                         : {
-                            rotate: [0, -8, 8, -5, 0],
-                            scale: [1, 1.1, 1, 1.05, 1],
+                            rotate: [0, -5, 5, -3, 0],
+                            scale: [1, 1.05, 1, 1.03, 1],
                           }
                     }
                     transition={
                       fase === "sello"
-                        ? { duration: 1.2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }
+                        ? { duration: 1.5, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }
                         : undefined
                     }
                   >
-                    <WaxSeal size={72} animated={false} />
+                    <GoldenSealLM size={76} />
                   </motion.div>
                 )}
               </AnimatePresence>

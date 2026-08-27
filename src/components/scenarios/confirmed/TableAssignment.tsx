@@ -24,9 +24,12 @@ const MESAS_REFERENCIA: Array<Pick<Mesa, "numero" | "pos_x" | "pos_y">> = [
 export function TableAssignment({ mesa }: TableAssignmentProps) {
   return (
     <section className="section-cinematic film-grain">
-      {/* Background */}
-      <div className="absolute inset-0 bg-alabaster" />
-      <div className="absolute inset-0 bg-champagne-glow" />
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/tarjetas-con-nombres-invitados.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">
