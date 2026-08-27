@@ -16,9 +16,9 @@ import {
 import type { GrupoInvitacion } from "@/types/domain";
 
 const COLORES_ESTADO: Record<string, string> = {
-  Confirmado: "#93A27D",
-  Pendiente: "#DDD0B8",
-  Rechazado: "#616E4D",
+  Confirmado: "#828661",
+  Pendiente: "#E7DBCB",
+  Rechazado: "#4B523C",
 };
 
 const ETIQUETAS_CATEGORIA: Record<string, string> = {
@@ -50,43 +50,93 @@ export function DashboardCharts({ grupos }: DashboardChartsProps) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-        <h3 className="mb-4 font-display text-lg text-olive-900">Grupos por categoría</h3>
+      <div className="rounded-2xl border border-pistachio-200/50 bg-white p-5 shadow-soft">
+        <h3 className="mb-4 font-display text-lg font-light italic text-olive-900">
+          Grupos por categoría
+        </h3>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={porCategoria}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#EBE3D5" />
-            <XAxis dataKey="categoria" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-            <Tooltip />
-            <Bar dataKey="grupos" fill="#93A27D" radius={[6, 6, 0, 0]} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E6E8DD" />
+            <XAxis
+              dataKey="categoria"
+              tick={{ fontSize: 11, fill: "#6b6b6b" }}
+              interval={0}
+              angle={-20}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#6b6b6b" }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#fff",
+                border: "1px solid #E6E8DD",
+                borderRadius: "12px",
+                color: "#1a1a1a",
+              }}
+            />
+            <Bar dataKey="grupos" fill="#828661" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-        <h3 className="mb-4 font-display text-lg text-olive-900">Distribución de estados</h3>
+      <div className="rounded-2xl border border-pistachio-200/50 bg-white p-5 shadow-soft">
+        <h3 className="mb-4 font-display text-lg font-light italic text-olive-900">
+          Distribución de estados
+        </h3>
         <ResponsiveContainer width="100%" height={260}>
           <PieChart>
-            <Pie data={porEstado} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+            <Pie
+              data={porEstado}
+              dataKey="value"
+              nameKey="name"
+              innerRadius={55}
+              outerRadius={90}
+              paddingAngle={2}
+            >
               {porEstado.map((entry) => (
                 <Cell key={entry.name} fill={COLORES_ESTADO[entry.name]} />
               ))}
             </Pie>
-            <Legend />
-            <Tooltip />
+            <Legend
+              wrapperStyle={{ color: "#6b6b6b", fontSize: "12px" }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#fff",
+                border: "1px solid #E6E8DD",
+                borderRadius: "12px",
+                color: "#1a1a1a",
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5 lg:col-span-2">
-        <h3 className="mb-4 font-display text-lg text-olive-900">Confirmaciones en el tiempo</h3>
+      <div className="rounded-2xl border border-pistachio-200/50 bg-white p-5 shadow-soft lg:col-span-2">
+        <h3 className="mb-4 font-display text-lg font-light italic text-olive-900">
+          Confirmaciones en el tiempo
+        </h3>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart data={serieTiempo}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#EBE3D5" />
-            <XAxis dataKey="fecha" tick={{ fontSize: 11 }} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-            <Tooltip />
-            <Line type="monotone" dataKey="acumulado" stroke="#616E4D" strokeWidth={2} dot={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E6E8DD" />
+            <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: "#6b6b6b" }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#6b6b6b" }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#fff",
+                border: "1px solid #E6E8DD",
+                borderRadius: "12px",
+                color: "#1a1a1a",
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="acumulado"
+              stroke="#828661"
+              strokeWidth={2}
+              dot={{ fill: "#828661", strokeWidth: 0 }}
+              activeDot={{ r: 6, fill: "#E7DBCB" }}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>

@@ -9,22 +9,23 @@
 
   body {
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   ::selection {
-    background-color: #93a27d;
-    color: #f1f0e8;
+    background-color: #828661;
+    color: #F9F9EF;
   }
 
   :focus-visible {
-    outline: 2px solid #616e4d;
+    outline: 2px solid #6B6F4E;
     outline-offset: 3px;
   }
 
   h1,
   h2,
   h3 {
-    font-family: "Fraunces", serif;
+    font-family: "Cormorant Garamond", "Fraunces", serif;
   }
 }
 
@@ -37,20 +38,80 @@
     @apply relative mx-auto w-full max-w-md px-6 py-20 sm:max-w-lg md:max-w-2xl lg:max-w-3xl;
   }
 
+  .section-cinematic {
+    @apply relative mx-auto w-full max-w-md px-6 py-24 sm:max-w-lg md:max-w-2xl lg:max-w-3xl;
+  }
+
   .divider-branch {
-    @apply mx-auto my-8 h-8 w-24 text-pistachio-500;
+    @apply mx-auto my-8 h-8 w-24 text-pistachio-400;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-olive px-8 py-3 font-body text-sm uppercase tracking-[0.18em] text-alabaster shadow-card transition-transform duration-300 hover:-translate-y-0.5 hover:bg-olive-900 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-olive px-8 py-3 font-body text-sm uppercase tracking-[0.18em] text-alabaster shadow-cinematic transition-all duration-500 hover:-translate-y-1 hover:bg-olive-500 hover:shadow-glow-olive active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-pistachio-400 bg-transparent px-8 py-3 font-body text-sm uppercase tracking-[0.18em] text-olive-900 transition-colors duration-300 hover:bg-pistachio-100 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-pistachio-300 bg-transparent px-8 py-3 font-body text-sm uppercase tracking-[0.18em] text-olive-900 transition-all duration-500 hover:bg-pistachio-50 hover:border-pistachio-400 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .card-surface {
-    @apply rounded-[28px] border border-pistachio-200/70 bg-white/70 p-6 shadow-card backdrop-blur-sm;
+    @apply rounded-[28px] border border-sage/50 bg-white/80 p-6 shadow-glass backdrop-blur-md;
+  }
+
+  .glass-card {
+    @apply rounded-[28px] border border-white/20 bg-white/10 p-6 shadow-glass backdrop-blur-lg;
+  }
+
+  .cinematic-overlay {
+    @apply pointer-events-none fixed inset-0 z-[100] opacity-[0.03];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  .film-grain {
+    position: relative;
+  }
+
+  .film-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 30px rgba(130, 134, 97, 0.3);
+  }
+
+  .parallax-container {
+    perspective: 1000px;
+    overflow: hidden;
+  }
+
+  .shimmer-border {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      transparent 30%,
+      rgba(231, 219, 203, 0.5) 50%,
+      transparent 70%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: shimmer-gold 4s linear infinite;
   }
 }
 
@@ -64,4 +125,22 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Custom scrollbar for cinematic feel */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F9F9EF;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CACEBE;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #969D7B;
 }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { useGuestsAdmin } from "@/hooks/useGuestsAdmin";
 import { GuestsTable } from "@/components/admin/GuestsTable";
 import { GuestFormModal } from "@/components/admin/GuestFormModal";
@@ -44,52 +45,96 @@ export default function GuestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <motion.div
+        className="flex flex-wrap items-center justify-between gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <div>
-          <h1 className="font-display text-2xl text-olive-900">Invitados</h1>
-          <p className="text-sm text-neutral-500">{filtrados.length} grupos mostrados de {grupos.length}</p>
+          <h1 className="font-display text-3xl font-light italic text-olive-900">Invitados</h1>
+          <p className="mt-1 font-body text-sm text-ink-muted">
+            {filtrados.length} grupos mostrados de {grupos.length}
+          </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => exportarExcel(filtrados)} className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-medium hover:bg-neutral-100">
+          <motion.button
+            onClick={() => exportarExcel(filtrados)}
+            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
             Excel
-          </button>
-          <button onClick={() => exportarCsv(filtrados)} className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-medium hover:bg-neutral-100">
+          </motion.button>
+          <motion.button
+            onClick={() => exportarCsv(filtrados)}
+            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
             CSV
-          </button>
-          <button onClick={() => exportarPdf(filtrados)} className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-medium hover:bg-neutral-100">
+          </motion.button>
+          <motion.button
+            onClick={() => exportarPdf(filtrados)}
+            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
             PDF
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             onClick={() => {
               setGrupoEditando(null);
               setModalAbierto(true);
             }}
-            className="rounded-lg bg-olive px-4 py-2 text-xs font-medium text-white hover:bg-olive-900"
+            className="rounded-lg bg-olive px-4 py-2 font-body text-xs uppercase tracking-wider text-alabaster shadow-soft transition-all hover:bg-olive-500"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             + Nuevo grupo
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-wrap gap-3">
-        <select value={categoria} onChange={(e) => setCategoria(e.target.value as typeof categoria)} className="rounded-lg border border-neutral-300 px-3 py-2 text-sm">
+      {/* Filters */}
+      <motion.div
+        className="flex flex-wrap gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.8 }}
+      >
+        <select
+          value={categoria}
+          onChange={(e) => setCategoria(e.target.value as typeof categoria)}
+          className="rounded-lg border border-pistachio-200 bg-white px-4 py-2 font-body text-sm text-ink focus:border-olive focus:outline-none"
+        >
           {CATEGORIAS.map((c) => (
             <option key={c} value={c}>
               {c === "todas" ? "Todas las categorías" : c.replace("_", " ")}
             </option>
           ))}
         </select>
-        <select value={estado} onChange={(e) => setEstado(e.target.value as typeof estado)} className="rounded-lg border border-neutral-300 px-3 py-2 text-sm">
+        <select
+          value={estado}
+          onChange={(e) => setEstado(e.target.value as typeof estado)}
+          className="rounded-lg border border-pistachio-200 bg-white px-4 py-2 font-body text-sm text-ink focus:border-olive focus:outline-none"
+        >
           {ESTADOS.map((e) => (
             <option key={e} value={e}>
               {e === "todos" ? "Todos los estados" : e}
             </option>
           ))}
         </select>
-      </div>
+      </motion.div>
 
       {loading ? (
-        <p className="text-neutral-400">Cargando invitados...</p>
+        <motion.p
+          className="text-ink-muted"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          Cargando invitados...
+        </motion.p>
       ) : (
         <GuestsTable
           grupos={filtrados}

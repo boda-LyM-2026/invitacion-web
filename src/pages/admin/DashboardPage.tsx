@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useKpis } from "@/hooks/useKpis";
 import { useGuestsAdmin } from "@/hooks/useGuestsAdmin";
 import { KpiCard } from "@/components/admin/KpiCard";
@@ -8,15 +9,29 @@ export default function DashboardPage() {
   const { grupos, loading: gruposLoading } = useGuestsAdmin();
 
   if (kpisLoading || gruposLoading || !kpis) {
-    return <p className="text-neutral-400">Cargando KPIs...</p>;
+    return (
+      <motion.p
+        className="text-ink-muted"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        Cargando KPIs...
+      </motion.p>
+    );
   }
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl text-olive-900">Resumen</h1>
-        <p className="text-sm text-neutral-500">Estado actual de las confirmaciones, en tiempo real.</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <h1 className="font-display text-3xl font-light italic text-olive-900">Resumen</h1>
+        <p className="mt-1 font-body text-sm text-ink-muted">
+          Estado actual de las confirmaciones, en tiempo real.
+        </p>
+      </motion.div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         <KpiCard label="Grupos totales" value={kpis.total_grupos} />

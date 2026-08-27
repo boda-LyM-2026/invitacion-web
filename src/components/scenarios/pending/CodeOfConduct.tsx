@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
 
@@ -10,23 +11,48 @@ const REGLAS = [
 
 export function CodeOfConduct() {
   return (
-    <section className="section-shell bg-alabaster">
-      <Reveal className="text-center">
-        <p className="eyebrow">Antes de venir</p>
-        <h2 className="mt-3 font-display text-3xl italic text-olive-900">Código de conducta</h2>
-        <OliveDivider className="text-pistachio-400" />
-      </Reveal>
+    <section className="section-cinematic film-grain">
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/herramientas-para-cortar-pastel.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
 
-      <Reveal delay={0.15}>
-        <ul className="mx-auto max-w-md space-y-4">
-          {REGLAS.map((regla) => (
-            <li key={regla} className="flex items-start gap-3 font-body text-sm leading-relaxed text-ink/80">
-              <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-pistachio-500" />
-              {regla}
-            </li>
-          ))}
-        </ul>
-      </Reveal>
+      <div className="relative z-10">
+        <Reveal className="text-center" variant="fade-up">
+          <p className="eyebrow">Antes de venir</p>
+          <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
+            Código de conducta
+          </h2>
+          <OliveDivider className="text-pistachio-400" />
+        </Reveal>
+
+        <Reveal delay={0.2} variant="fade-up">
+          <ul className="mx-auto mt-8 max-w-md space-y-4">
+            {REGLAS.map((regla, i) => (
+              <motion.li
+                key={regla}
+                className="flex items-start gap-4 rounded-2xl bg-white/60 p-4 shadow-glass backdrop-blur-sm transition-all duration-500 hover:shadow-glow-olive"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 + i * 0.15, duration: 0.8 }}
+              >
+                <motion.div
+                  className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-olive text-alabaster"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <span className="font-display text-sm">{i + 1}</span>
+                </motion.div>
+                <span className="font-body text-sm leading-relaxed text-ink-light">
+                  {regla}
+                </span>
+              </motion.li>
+            ))}
+          </ul>
+        </Reveal>
+      </div>
     </section>
   );
 }

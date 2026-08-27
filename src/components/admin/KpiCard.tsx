@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 interface KpiCardProps {
   label: string;
   value: string | number;
@@ -6,13 +8,18 @@ interface KpiCardProps {
 
 export function KpiCard({ label, value, accent = false }: KpiCardProps) {
   return (
-    <div
-      className={`rounded-2xl border p-5 shadow-sm ${
-        accent ? "border-pistachio-300 bg-pistachio-50" : "border-neutral-200 bg-white"
+    <motion.div
+      className={`rounded-2xl border p-5 backdrop-blur-sm transition-all duration-300 ${
+        accent
+          ? "border-olive/30 bg-olive/10 shadow-soft"
+          : "border-pistachio-200/50 bg-white hover:bg-pistachio-50"
       }`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">{label}</p>
-      <p className="mt-2 font-display text-3xl text-olive-900">{value}</p>
-    </div>
+      <p className="font-body text-xs uppercase tracking-wider text-ink-muted">{label}</p>
+      <p className="mt-2 font-display text-3xl font-light text-olive-900">{value}</p>
+    </motion.div>
   );
 }
