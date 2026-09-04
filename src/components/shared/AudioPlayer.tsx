@@ -11,27 +11,24 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  // Si el archivo no existe (no subido en deploy) el reproductor no aparece.
+  const [indisponible, setIndisponible] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Check localStorage for preference
-    const wasPlaying = localStorage.getItem("wedding-audio-playing") === "true";
-    if (wasPlaying) {
-      audio.play().catch(() => {
-        // Autoplay blocked, user needs to interact
-      });
-      setIsPlaying(true);
-    }
+    const handleError = () => setIndisponible(true);
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
+    audio.addEventListener("error", handleError);
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
 
     return () => {
+      audio.removeEventListener("error", handleError);
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
@@ -58,9 +55,11 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
     setIsMuted(!isMuted);
   };
 
+  if (indisponible) return null;
+
   return (
     <div className={`fixed bottom-6 right-6 z-[80] ${className}`}>
-      <audio ref={audioRef} src={src} loop preload="auto" />
+      <audio ref={audioRef} src={src} loop preload="none" />
 
       <motion.div
         className="relative flex items-center gap-2"

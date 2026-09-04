@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { BADGES_ESTADO, ETIQUETAS_ESTADO } from "@/config/catalogos";
 import type { GrupoInvitacion } from "@/types/domain";
 
 interface GuestsTableProps {
@@ -7,18 +8,6 @@ interface GuestsTableProps {
   onEditar: (grupo: GrupoInvitacion) => void;
   onEliminar: (grupo: GrupoInvitacion) => void;
 }
-
-const BADGE: Record<GrupoInvitacion["estado"], string> = {
-  confirmed: "bg-pistachio-100 text-pistachio-700 border-pistachio-300",
-  pending: "bg-champagne-200 text-olive-700 border-champagne-300",
-  declined: "bg-pistachio-50 text-ink-muted border-pistachio-200",
-};
-
-const ETIQUETA: Record<GrupoInvitacion["estado"], string> = {
-  confirmed: "Confirmado",
-  pending: "Pendiente",
-  declined: "Rechazado",
-};
 
 function enlaceInvitacion(accessToken: string): string {
   return `${window.location.origin}/invitacion/${accessToken}`;
@@ -66,9 +55,9 @@ export function GuestsTable({ grupos, onEditar, onEliminar }: GuestsTableProps) 
               <td className="px-4 py-3 text-ink-light">{g.limite_personas}</td>
               <td className="px-4 py-3">
                 <span
-                  className={`rounded-full border px-2.5 py-1 text-xs font-medium ${BADGE[g.estado]}`}
+                  className={`rounded-full border px-2.5 py-1 text-xs font-medium ${BADGES_ESTADO[g.estado]}`}
                 >
-                  {ETIQUETA[g.estado]}
+                  {ETIQUETAS_ESTADO[g.estado]}
                 </span>
               </td>
               <td className="px-4 py-3 text-ink-light">

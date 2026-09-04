@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { OliveDivider } from "./OliveDivider";
+import { NOMBRE_NOVIOS, FECHA_BODA_TEXTO } from "@/config/wedding";
 
 interface HeroProps {
   nombreInvitado?: string;
@@ -21,8 +22,11 @@ export function Hero({ nombreInvitado }: HeroProps) {
         <img
           src={FOTO_PRINCIPAL}
           alt="Lenan y Mauricio"
+          width={1200}
+          height={1800}
           className="h-full w-full object-cover"
           loading="eager"
+          fetchPriority="high"
         />
       </motion.div>
 
@@ -82,7 +86,7 @@ export function Hero({ nombreInvitado }: HeroProps) {
             animate={{ y: 0 }}
             transition={{ delay: 0.9, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            Lenan &amp; Mauricio
+            {NOMBRE_NOVIOS}
           </motion.h1>
         </div>
 
@@ -93,7 +97,7 @@ export function Hero({ nombreInvitado }: HeroProps) {
           animate={{ opacity: 1, letterSpacing: "0.25em" }}
           transition={{ delay: 1.3, duration: 1.2 }}
         >
-          14 · Noviembre · 2026
+          {FECHA_BODA_TEXTO}
         </motion.p>
 
         {/* Divider */}

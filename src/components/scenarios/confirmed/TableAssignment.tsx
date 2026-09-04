@@ -1,25 +1,12 @@
 import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
+import { MESAS_REFERENCIA } from "@/data/mesas";
 import type { Mesa } from "@/types/domain";
 
 interface TableAssignmentProps {
   mesa: Mesa | null | undefined;
 }
-
-const MESAS_REFERENCIA: Array<Pick<Mesa, "numero" | "pos_x" | "pos_y">> = [
-  { numero: 1, pos_x: 15, pos_y: 20 },
-  { numero: 2, pos_x: 38, pos_y: 15 },
-  { numero: 3, pos_x: 62, pos_y: 15 },
-  { numero: 4, pos_x: 85, pos_y: 20 },
-  { numero: 5, pos_x: 15, pos_y: 50 },
-  { numero: 6, pos_x: 38, pos_y: 50 },
-  { numero: 7, pos_x: 62, pos_y: 50 },
-  { numero: 8, pos_x: 85, pos_y: 50 },
-  { numero: 9, pos_x: 25, pos_y: 80 },
-  { numero: 10, pos_x: 50, pos_y: 80 },
-  { numero: 11, pos_x: 75, pos_y: 80 },
-];
 
 export function TableAssignment({ mesa }: TableAssignmentProps) {
   return (

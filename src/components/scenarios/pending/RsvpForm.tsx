@@ -1,26 +1,33 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
 import { useRsvp } from "@/hooks/useRsvp";
-import type { GrupoInvitacion } from "@/types/domain";
+import type { GrupoInvitacion, RsvpPayload } from "@/types/domain";
 
 interface RsvpFormProps {
   grupo: GrupoInvitacion;
   onSuccess: () => void;
 }
 
-interface CampoAcompanante {
-  id?: string;
-  nombre_completo: string;
-  es_nino: boolean;
-}
+type CampoAcompanante = RsvpPayload["acompanantes"][number];
 
 export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
   const { submitRsvp, submitting, error } = useRsvp();
   const [intencion, setIntencion] = useState<"confirmed" | "declined" | null>(null);
   const [mensaje, setMensaje] = useState("");
   const [exito, setExito] = useState(false);
+  const exitoTimerRef = useRef<number | null>(null);
+
+  // No disparar onSuccess si el usuario ya navegó/desmontó el componente.
+  useEffect(() => {
+    return () => {
+      if (exitoTimerRef.current) {
+        window.clearTimeout(exitoTimerRef.current);
+        exitoTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const cuposAcompanantes = Math.max(grupo.limite_personas - 1, 0);
   const [acompanantes, setAcompanantes] = useState<CampoAcompanante[]>(() => {
@@ -53,7 +60,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
     });
     if (ok) {
       setExito(true);
-      setTimeout(() => onSuccess(), 2000);
+      exitoTimerRef.current = window.setTimeout(() => onSuccess(), 2000);
     }
   }
 

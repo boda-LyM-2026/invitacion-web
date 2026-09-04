@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { ETIQUETAS_ESTADO } from "@/config/catalogos";
 import type { GrupoInvitacion } from "@/types/domain";
 
 interface FilaExport {
@@ -15,12 +16,6 @@ interface FilaExport {
   "Mensaje RSVP": string;
   Enlace: string;
 }
-
-const ETIQUETAS_ESTADO: Record<GrupoInvitacion["estado"], string> = {
-  pending: "Pendiente",
-  confirmed: "Confirmado",
-  declined: "Rechazado",
-};
 
 function aFilas(grupos: GrupoInvitacion[]): FilaExport[] {
   const origen = window.location.origin;

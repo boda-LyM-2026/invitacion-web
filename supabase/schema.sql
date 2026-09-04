@@ -1,34 +1,52 @@
 -- =====================================================================
 -- Lenan & Mauricio — Invitación digital
 -- Esquema completo de Supabase (PostgreSQL)
--- Ejecutar en el SQL Editor de Supabase, de arriba hacia abajo.
+--
+-- Diseñado para ser RE-EJECUTABLE (idempotente): se puede correr entero
+-- en el SQL Editor de Supabase varias veces sin errores ni duplicados.
+--
+-- Modelo de seguridad (RF-03):
+--   * El invitado SOLO entra por dos funciones RPC: obtener_grupo (lectura)
+--     y submit_rsvp (escritura). Ambas son SECURITY DEFINER con
+--     `set search_path = public` y localizan el grupo por access_token exacto.
+--   * NO existen policies de lectura pública: `anon` no puede consultar
+--     tablas directamente (RLS sin policy = cero filas).
+--   * Toda lectura/escritura administrativa exige estar autenticado Y
+--     tener una fila propia en admin_profiles (novia/novio/organizador).
 -- =====================================================================
 
 create extension if not exists "pgcrypto";
 
 -- ---------------------------------------------------------------------
--- 1. TIPOS ENUMERADOS
+-- 1. TIPOS ENUMERADOS (idempotente)
 -- ---------------------------------------------------------------------
 
-create type estado_invitacion as enum ('pending', 'confirmed', 'declined');
-
-create type categoria_invitado as enum (
-  'familia_novia',
-  'familia_novio',
-  'amigos_novia',
-  'amigos_novio',
-  'trabajo',
-  'otros'
-);
-
-create type nivel_importancia as enum ('principal', 'estandar', 'cortesia');
+do $$
+begin
+  if to_regtype('estado_invitacion') is null then
+    create type estado_invitacion as enum ('pending', 'confirmed', 'declined');
+  end if;
+  if to_regtype('categoria_invitado') is null then
+    create type categoria_invitado as enum (
+      'familia_novia',
+      'familia_novio',
+      'amigos_novia',
+      'amigos_novio',
+      'trabajo',
+      'otros'
+    );
+  end if;
+  if to_regtype('nivel_importancia') is null then
+    create type nivel_importancia as enum ('principal', 'estandar', 'cortesia');
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------
--- 2. TABLAS
+-- 2. TABLAS (idempotente)
 -- ---------------------------------------------------------------------
 
--- Mesas del salón: usadas para el croquis (Section 05, Escenario B)
-create table mesas (
+-- Mesas del salón: catálogo usado por el panel y para el croquis.
+create table if not exists mesas (
   id uuid primary key default gen_random_uuid(),
   numero integer not null unique,
   nombre text,
@@ -39,7 +57,7 @@ create table mesas (
 );
 
 -- Grupo de invitación: la unidad de acceso (RF-01). Un enlace = un grupo.
-create table grupos_invitacion (
+create table if not exists grupos_invitacion (
   id uuid primary key default gen_random_uuid(),
   access_token uuid not null unique default gen_random_uuid(),
   nombre_grupo text not null,
@@ -56,7 +74,7 @@ create table grupos_invitacion (
 );
 
 -- Acompañantes de un grupo: RF-07 (precarga si existen, campos vacíos si no)
-create table acompanantes (
+create table if not exists acompanantes (
   id uuid primary key default gen_random_uuid(),
   grupo_id uuid not null references grupos_invitacion (id) on delete cascade,
   nombre_completo text,
@@ -65,30 +83,41 @@ create table acompanantes (
   creado_en timestamptz not null default now()
 );
 
--- Perfil ligado a auth.users, para distinguir admins (novios/organizadores)
-create table admin_profiles (
+-- Perfil ligado a auth.users: un usuario SOLO es admin si tiene fila aquí.
+-- Los primeros admins se dan de alta desde el Dashboard de Supabase
+-- (service_role) con su `auth.users.id` (ver sección de README).
+create table if not exists admin_profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   nombre_completo text,
   rol text not null default 'organizador' check (rol in ('novia', 'novio', 'organizador')),
   creado_en timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------------
--- 3. ÍNDICES (soportan RF-02: resolver /invitacion/{token} en < 1.5s)
--- ---------------------------------------------------------------------
-
-create unique index idx_grupos_access_token on grupos_invitacion (access_token);
-create index idx_grupos_estado on grupos_invitacion (estado);
-create index idx_grupos_categoria on grupos_invitacion (categoria);
-create index idx_grupos_importancia on grupos_invitacion (importancia);
-create index idx_grupos_mesa_id on grupos_invitacion (mesa_id);
-create index idx_acompanantes_grupo_id on acompanantes (grupo_id);
+-- Registro de intentos de RSVP por grupo (rate-limit, RF-06).
+create table if not exists rsvp_intentos (
+  id uuid primary key default gen_random_uuid(),
+  grupo_id uuid not null references grupos_invitacion (id) on delete cascade,
+  creado_en timestamptz not null default now()
+);
 
 -- ---------------------------------------------------------------------
--- 4. TRIGGERS
+-- 3. ÍNDICES (idempotente)
+--    Nota: access_token ya está indexado por su constraint UNIQUE; el
+--    índice implícito resultante es el que usa la búsqueda por token.
 -- ---------------------------------------------------------------------
 
--- Mantiene actualizado_en al día en cada UPDATE
+create index if not exists idx_grupos_estado on grupos_invitacion (estado);
+create index if not exists idx_grupos_categoria on grupos_invitacion (categoria);
+create index if not exists idx_grupos_importancia on grupos_invitacion (importancia);
+create index if not exists idx_grupos_mesa_id on grupos_invitacion (mesa_id);
+create index if not exists idx_acompanantes_grupo_id on acompanantes (grupo_id);
+create index if not exists idx_rsvp_intentos_grupo_creado
+  on rsvp_intentos (grupo_id, creado_en);
+
+-- ---------------------------------------------------------------------
+-- 4. TRIGGERS (idempotente)
+-- ---------------------------------------------------------------------
+
 create or replace function set_actualizado_en()
 returns trigger
 language plpgsql
@@ -99,16 +128,16 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_grupos_actualizado_en on grupos_invitacion;
 create trigger trg_grupos_actualizado_en
   before update on grupos_invitacion
   for each row
   execute function set_actualizado_en();
 
 -- ---------------------------------------------------------------------
--- 5. FUNCIÓN RPC: submit_rsvp (RF-06 / RF-07)
--- Se ejecuta con SECURITY DEFINER para poder escribir el estado y los
--- acompañantes de forma atómica, validando limite_personas en el servidor
--- (nunca confiar solo en la validación del cliente).
+-- 5. FUNCIÓN RPC: submit_rsvp (RF-06 / RF-07) — ÚNICA vía de escritura
+-- del invitado. SECURITY DEFINER para escribir estado + acompañantes de
+-- forma atómica validando limite_personas EN EL SERVIDOR, y con rate-limit.
 -- ---------------------------------------------------------------------
 
 create or replace function submit_rsvp(
@@ -126,7 +155,11 @@ declare
   v_grupo_id uuid;
   v_limite integer;
   v_cantidad integer;
+  v_intentos integer;
+  v_nuevo_mensaje text;
 begin
+  -- Localiza el grupo por token EXACTO: un invitado solo puede escribir
+  -- sobre su propio grupo aunque conociera ids de otros.
   select id, limite_personas into v_grupo_id, v_limite
   from grupos_invitacion
   where access_token = p_access_token;
@@ -135,8 +168,22 @@ begin
     raise exception 'Invitación no encontrada';
   end if;
 
+  -- Anti-abuso: máximo 10 envíos de RSVP por grupo en la última hora.
+  select count(*) into v_intentos
+  from rsvp_intentos
+  where grupo_id = v_grupo_id
+    and creado_en > now() - interval '1 hour';
+  if v_intentos >= 10 then
+    raise exception 'Demasiados intentos. Intenta de nuevo más tarde.';
+  end if;
+  insert into rsvp_intentos (grupo_id) values (v_grupo_id);
+
   if p_estado not in ('confirmed', 'declined') then
     raise exception 'Estado de RSVP inválido';
+  end if;
+
+  if p_acompanantes is not null and jsonb_typeof(p_acompanantes) <> 'array' then
+    raise exception 'Acompañantes inválidos';
   end if;
 
   v_cantidad := coalesce(jsonb_array_length(p_acompanantes), 0);
@@ -144,9 +191,14 @@ begin
     raise exception 'Excede el límite de personas del grupo';
   end if;
 
+  v_nuevo_mensaje := nullif(btrim(coalesce(p_mensaje, '')), '');
+  if length(v_nuevo_mensaje) > 500 then
+    raise exception 'El mensaje es demasiado largo';
+  end if;
+
   update grupos_invitacion
   set estado = p_estado,
-      mensaje_rsvp = p_mensaje,
+      mensaje_rsvp = v_nuevo_mensaje,
       respondido_en = now()
   where id = v_grupo_id;
 
@@ -156,17 +208,81 @@ begin
     insert into acompanantes (grupo_id, nombre_completo, es_nino, confirmado)
     select
       v_grupo_id,
-      elem->>'nombre_completo',
+      left(nullif(btrim(elem->>'nombre_completo'), ''), 120),
       coalesce((elem->>'es_nino')::boolean, false),
       true
-    from jsonb_array_elements(p_acompanantes) as elem;
+    from jsonb_array_elements(p_acompanantes) as elem
+    where btrim(coalesce(elem->>'nombre_completo', '')) <> '';
   end if;
 end;
 $$;
 
 -- ---------------------------------------------------------------------
--- 6. VISTA: kpi_resumen (RF-09)
--- Agrega los conteos en el servidor para no traer todas las filas al cliente.
+-- 6. FUNCIÓN RPC: obtener_grupo (RF-02) — ÚNICA vía de lectura del invitado.
+-- Devuelve el grupo + acompañantes + mesa en un solo jsonb. Devuelve NULL
+-- si el token no existe. SECURITY DEFINER con search_path fijo.
+-- ---------------------------------------------------------------------
+
+create or replace function obtener_grupo(p_access_token uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_grupo grupos_invitacion%rowtype;
+  v_json jsonb;
+begin
+  select * into v_grupo
+  from grupos_invitacion
+  where access_token = p_access_token;
+
+  if not found then
+    return null;
+  end if;
+
+  select jsonb_build_object(
+    'id', g.id,
+    'access_token', g.access_token,
+    'nombre_grupo', g.nombre_grupo,
+    'invitado_principal', g.invitado_principal,
+    'limite_personas', g.limite_personas,
+    'categoria', g.categoria,
+    'importancia', g.importancia,
+    'estado', g.estado,
+    'mesa_id', g.mesa_id,
+    'mensaje_rsvp', g.mensaje_rsvp,
+    'respondido_en', g.respondido_en,
+    'creado_en', g.creado_en,
+    'acompanantes', coalesce(
+      (
+        select jsonb_agg(
+          jsonb_build_object(
+            'id', a.id,
+            'grupo_id', a.grupo_id,
+            'nombre_completo', a.nombre_completo,
+            'es_nino', a.es_nino,
+            'confirmado', a.confirmado
+          )
+          order by a.creado_en, a.id
+        )
+        from acompanantes a
+        where a.grupo_id = g.id
+      ),
+      '[]'::jsonb
+    ),
+    'mesa', (select to_jsonb(m) from mesas m where m.id = g.mesa_id)
+  ) into v_json
+  from grupos_invitacion g
+  where g.id = v_grupo.id;
+
+  return v_json;
+end;
+$$;
+
+-- ---------------------------------------------------------------------
+-- 7. VISTA: kpi_resumen (RF-09)
+-- Agrega los conteos en el servidor; SOLO admin autenticado la consulta.
 -- ---------------------------------------------------------------------
 
 create or replace view kpi_resumen as
@@ -193,102 +309,109 @@ select
 from grupos_invitacion g;
 
 -- ---------------------------------------------------------------------
--- 7. ROW LEVEL SECURITY (RF-03: aislamiento total entre grupos)
+-- 8. ROW LEVEL SECURITY (RF-03: aislamiento total entre grupos)
 -- ---------------------------------------------------------------------
 
 alter table grupos_invitacion enable row level security;
 alter table acompanantes enable row level security;
 alter table mesas enable row level security;
 alter table admin_profiles enable row level security;
+alter table rsvp_intentos enable row level security;
 
--- --- Lectura pública, pero SOLO de un grupo si se conoce su access_token ---
--- No existe policy que permita "select *" sin filtro: el cliente siempre
--- debe consultar con .eq('access_token', token), y esta policy exige que
--- el token en la fila coincida con el que Postgres recibe en la sesión
--- (current_setting) o, más simple y realista con supabase-js anon key,
--- se restringe vía la propia condición de igualdad en la query + el hecho
--- de que el token es un UUID no adivinable. Para reforzarlo, exponemos
--- solo lectura general (anon) y toda escritura pasa por submit_rsvp
--- (SECURITY DEFINER), nunca por UPDATE directo del cliente.
-create policy "public_select_grupo_por_token"
+-- --- anon: sin policies de lectura/escritura sobre tablas. La única
+-- puerta de entrada del invitado son las funciones RPC (owner via
+-- SECURITY DEFINER), que localizan por access_token exacto. ---
+
+-- --- Admin (novios/organizadores): todo pasa por tener una fila propia
+-- en admin_profiles. `using`/`with check` evalúa la subconsulta bajo RLS
+-- de admin_profiles (cada admin puede leer su propia fila), así que un
+-- usuario autenticado sin perfil NO puede leer ni escribir nada. ---
+
+drop policy if exists admin_select_grupos on grupos_invitacion;
+create policy admin_select_grupos
   on grupos_invitacion
   for select
-  to anon, authenticated
-  using (true);
+  to authenticated
+  using (exists (select 1 from admin_profiles ap where ap.id = auth.uid()));
 
-create policy "public_select_acompanantes"
-  on acompanantes
-  for select
-  to anon, authenticated
-  using (true);
-
-create policy "public_select_mesas"
-  on mesas
-  for select
-  to anon, authenticated
-  using (true);
-
--- --- Escritura: solo usuarios autenticados (novios/organizadores) ---
-create policy "admin_insert_grupos"
+drop policy if exists admin_insert_grupos on grupos_invitacion;
+create policy admin_insert_grupos
   on grupos_invitacion
   for insert
   to authenticated
-  with check (true);
+  with check (exists (select 1 from admin_profiles ap where ap.id = auth.uid()));
 
-create policy "admin_update_grupos"
+drop policy if exists admin_update_grupos on grupos_invitacion;
+create policy admin_update_grupos
   on grupos_invitacion
   for update
   to authenticated
-  using (true)
-  with check (true);
+  using (exists (select 1 from admin_profiles ap where ap.id = auth.uid()))
+  with check (exists (select 1 from admin_profiles ap where ap.id = auth.uid()));
 
-create policy "admin_delete_grupos"
+drop policy if exists admin_delete_grupos on grupos_invitacion;
+create policy admin_delete_grupos
   on grupos_invitacion
   for delete
   to authenticated
-  using (true);
+  using (exists (select 1 from admin_profiles ap where ap.id = auth.uid()));
 
-create policy "admin_write_acompanantes"
+drop policy if exists admin_write_acompanantes on acompanantes;
+create policy admin_write_acompanantes
   on acompanantes
   for all
   to authenticated
-  using (true)
-  with check (true);
+  using (exists (select 1 from admin_profiles ap where ap.id = auth.uid()))
+  with check (exists (select 1 from admin_profiles ap where ap.id = auth.uid()));
 
-create policy "admin_write_mesas"
+drop policy if exists admin_write_mesas on mesas;
+create policy admin_write_mesas
   on mesas
   for all
   to authenticated
-  using (true)
-  with check (true);
+  using (exists (select 1 from admin_profiles ap where ap.id = auth.uid()))
+  with check (exists (select 1 from admin_profiles ap where ap.id = auth.uid()));
 
-create policy "admin_read_own_profile"
+drop policy if exists admin_read_own_profile on admin_profiles;
+create policy admin_read_own_profile
   on admin_profiles
   for select
   to authenticated
   using (auth.uid() = id);
 
--- Nota importante sobre RF-03 (aislamiento total entre grupos):
--- El invitado NUNCA hace un UPDATE directo — toda escritura de su propio
--- RSVP pasa por la función submit_rsvp(access_token, ...), que primero
--- localiza el grupo por token y solo entonces escribe. Esto evita que un
--- invitado pueda modificar el registro de otro grupo aunque conociera su id,
--- porque la única vía de escritura exige conocer el access_token exacto
--- (UUIDv4, no adivinable) del grupo que se quiere modificar.
+-- ---------------------------------------------------------------------
+-- 9. PRIVILEGIOS
+--    * Funciones RPC ejecutables por anon/authenticated (puerta de entrada).
+--    * kpi_resumen queda fuera del alcance de anon (aggres sin PII, pero
+--      solo lo consume el panel admin).
+-- ---------------------------------------------------------------------
+
+revoke select on kpi_resumen from anon;
+
+grant execute on function submit_rsvp(uuid, estado_invitacion, text, jsonb) to anon, authenticated;
+grant execute on function obtener_grupo(uuid) to anon, authenticated;
 
 -- ---------------------------------------------------------------------
--- 8. DATOS DE EJEMPLO (opcional, borrar antes de producción)
+-- 10. DATOS DE EJEMPLO (idempotente — no duplica si ya existen)
 -- ---------------------------------------------------------------------
 
 insert into mesas (numero, nombre, capacidad, pos_x, pos_y) values
-  (1, 'Mesa Alabastro', 8, 15, 20),
-  (2, 'Mesa Champagne', 8, 38, 15),
-  (3, 'Mesa Pistacho', 8, 62, 15),
-  (4, 'Mesa Olivo', 8, 85, 20),
-  (5, 'Mesa Sage', 8, 15, 50),
-  (6, 'Mesa Cochabamba', 8, 38, 50);
+  (1,  'Mesa Alabastro',  8, 15, 20),
+  (2,  'Mesa Champagne',  8, 38, 15),
+  (3,  'Mesa Pistacho',   8, 62, 15),
+  (4,  'Mesa Olivo',      8, 85, 20),
+  (5,  'Mesa Sage',       8, 15, 50),
+  (6,  'Mesa Cochabamba', 8, 38, 50),
+  (7,  'Mesa Jardín',     8, 62, 50),
+  (8,  'Mesa Vino',       8, 85, 50),
+  (9,  'Mesa Azahar',     8, 25, 80),
+  (10, 'Mesa Romero',     8, 50, 80),
+  (11, 'Mesa Lavanda',    8, 75, 80)
+on conflict (numero) do nothing;
 
 insert into grupos_invitacion (nombre_grupo, invitado_principal, limite_personas, categoria, importancia, estado)
-values
-  ('Familia Rojas', 'Camila Rojas', 3, 'familia_novia', 'principal', 'pending'),
-  ('Familia Herrera', 'Daniel Herrera', 2, 'amigos_novio', 'estandar', 'pending');
+select * from (values
+  ('Familia Rojas', 'Camila Rojas', 3, 'familia_novia'::categoria_invitado, 'principal'::nivel_importancia, 'pending'::estado_invitacion),
+  ('Familia Herrera', 'Daniel Herrera', 2, 'amigos_novio'::categoria_invitado, 'estandar'::nivel_importancia, 'pending'::estado_invitacion)
+) as v (nombre_grupo, invitado_principal, limite_personas, categoria, importancia, estado)
+where not exists (select 1 from grupos_invitacion);

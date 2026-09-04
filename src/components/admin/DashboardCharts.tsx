@@ -13,21 +13,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { ETIQUETAS_CATEGORIA } from "@/config/catalogos";
+import { buildSerieTiempo } from "@/lib/stats";
 import type { GrupoInvitacion } from "@/types/domain";
 
 const COLORES_ESTADO: Record<string, string> = {
   Confirmado: "#828661",
   Pendiente: "#E7DBCB",
   Rechazado: "#4B523C",
-};
-
-const ETIQUETAS_CATEGORIA: Record<string, string> = {
-  familia_novia: "Familia novia",
-  familia_novio: "Familia novio",
-  amigos_novia: "Amigos novia",
-  amigos_novio: "Amigos novio",
-  trabajo: "Trabajo",
-  otros: "Otros",
 };
 
 interface DashboardChartsProps {
@@ -142,23 +135,4 @@ export function DashboardCharts({ grupos }: DashboardChartsProps) {
       </div>
     </div>
   );
-}
-
-function buildSerieTiempo(grupos: GrupoInvitacion[]) {
-  const confirmados = grupos
-    .filter((g) => g.estado === "confirmed" && g.respondido_en)
-    .map((g) => g.respondido_en as string)
-    .sort();
-
-  const porDia = new Map<string, number>();
-  confirmados.forEach((iso) => {
-    const dia = iso.slice(0, 10);
-    porDia.set(dia, (porDia.get(dia) ?? 0) + 1);
-  });
-
-  let acumulado = 0;
-  return Array.from(porDia.entries()).map(([fecha, cantidad]) => {
-    acumulado += cantidad;
-    return { fecha, acumulado };
-  });
 }

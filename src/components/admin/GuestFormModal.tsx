@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { NuevoGrupoInput } from "@/hooks/useGuestsAdmin";
+import { CATEGORIAS, IMPORTANCIAS } from "@/config/catalogos";
 import type { CategoriaInvitado, GrupoInvitacion, NivelImportancia } from "@/types/domain";
 
 interface GuestFormModalProps {
@@ -8,17 +9,6 @@ interface GuestFormModalProps {
   onCancelar: () => void;
   onGuardar: (input: NuevoGrupoInput) => Promise<void>;
 }
-
-const CATEGORIAS: CategoriaInvitado[] = [
-  "familia_novia",
-  "familia_novio",
-  "amigos_novia",
-  "amigos_novio",
-  "trabajo",
-  "otros",
-];
-
-const IMPORTANCIAS: NivelImportancia[] = ["principal", "estandar", "cortesia"];
 
 export function GuestFormModal({ grupoInicial, onCancelar, onGuardar }: GuestFormModalProps) {
   const [form, setForm] = useState<NuevoGrupoInput>({

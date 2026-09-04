@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { WaxSeal } from "./WaxSeal";
 import { ParticleField } from "./ParticleField";
+import { NOMBRE_NOVIOS, FECHA_BODA_TEXTO } from "@/config/wedding";
 
 export function Footer() {
   return (
@@ -40,7 +41,7 @@ export function Footer() {
         />
 
         <p className="mt-6 font-body text-sm uppercase tracking-cinematic text-champagne/70">
-          Lenan &amp; Mauricio · 14 de noviembre de 2026
+          {NOMBRE_NOVIOS} · {FECHA_BODA_TEXTO}
         </p>
       </motion.div>
     </footer>

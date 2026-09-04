@@ -3,25 +3,16 @@ import { motion } from "framer-motion";
 import { useGuestsAdmin } from "@/hooks/useGuestsAdmin";
 import { GuestsTable } from "@/components/admin/GuestsTable";
 import { GuestFormModal } from "@/components/admin/GuestFormModal";
-import { exportarCsv, exportarExcel, exportarPdf } from "@/lib/exportUtils";
-import type { CategoriaInvitado, EstadoInvitacion, GrupoInvitacion } from "@/types/domain";
+import { CATEGORIAS, ESTADOS } from "@/config/catalogos";
+import type { GrupoInvitacion } from "@/types/domain";
 
-const CATEGORIAS: Array<CategoriaInvitado | "todas"> = [
-  "todas",
-  "familia_novia",
-  "familia_novio",
-  "amigos_novia",
-  "amigos_novio",
-  "trabajo",
-  "otros",
-];
-
-const ESTADOS: Array<EstadoInvitacion | "todos"> = ["todos", "pending", "confirmed", "declined"];
+const OPCIONES_CATEGORIA = ["todas", ...CATEGORIAS] as const;
+const OPCIONES_ESTADO = ["todos", ...ESTADOS] as const;
 
 export default function GuestsPage() {
   const { grupos, loading, crear, actualizar, eliminar } = useGuestsAdmin();
-  const [categoria, setCategoria] = useState<CategoriaInvitado | "todas">("todas");
-  const [estado, setEstado] = useState<EstadoInvitacion | "todos">("todos");
+  const [categoria, setCategoria] = useState<(typeof OPCIONES_CATEGORIA)[number]>("todas");
+  const [estado, setEstado] = useState<(typeof OPCIONES_ESTADO)[number]>("todos");
   const [modalAbierto, setModalAbierto] = useState(false);
   const [grupoEditando, setGrupoEditando] = useState<GrupoInvitacion | null>(null);
 
@@ -43,6 +34,18 @@ export default function GuestsPage() {
     setGrupoEditando(null);
   }
 
+  // xlsx/jsPDF (exportUtils) se cargan bajo demanda: no deben pesar
+  // en el bundle mientras nadie exporta.
+  async function exportar(tipo: "excel" | "csv" | "pdf") {
+    const mod = await import("@/lib/exportUtils");
+    const exportadores = {
+      excel: mod.exportarExcel,
+      csv: mod.exportarCsv,
+      pdf: mod.exportarPdf,
+    };
+    exportadores[tipo](filtrados);
+  }
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -59,7 +62,7 @@ export default function GuestsPage() {
         </div>
         <div className="flex gap-2">
           <motion.button
-            onClick={() => exportarExcel(filtrados)}
+            onClick={() => void exportar("excel")}
             className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -67,7 +70,7 @@ export default function GuestsPage() {
             Excel
           </motion.button>
           <motion.button
-            onClick={() => exportarCsv(filtrados)}
+            onClick={() => void exportar("csv")}
             className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -75,7 +78,7 @@ export default function GuestsPage() {
             CSV
           </motion.button>
           <motion.button
-            onClick={() => exportarPdf(filtrados)}
+            onClick={() => void exportar("pdf")}
             className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -108,7 +111,7 @@ export default function GuestsPage() {
           onChange={(e) => setCategoria(e.target.value as typeof categoria)}
           className="rounded-lg border border-pistachio-200 bg-white px-4 py-2 font-body text-sm text-ink focus:border-olive focus:outline-none"
         >
-          {CATEGORIAS.map((c) => (
+          {OPCIONES_CATEGORIA.map((c) => (
             <option key={c} value={c}>
               {c === "todas" ? "Todas las categorías" : c.replace("_", " ")}
             </option>
@@ -119,7 +122,7 @@ export default function GuestsPage() {
           onChange={(e) => setEstado(e.target.value as typeof estado)}
           className="rounded-lg border border-pistachio-200 bg-white px-4 py-2 font-body text-sm text-ink focus:border-olive focus:outline-none"
         >
-          {ESTADOS.map((e) => (
+          {OPCIONES_ESTADO.map((e) => (
             <option key={e} value={e}>
               {e === "todos" ? "Todos los estados" : e}
             </option>

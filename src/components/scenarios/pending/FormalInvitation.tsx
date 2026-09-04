@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
+import { FECHA_BODA_TEXTO, HORA_BODA_TEXTO, LUGAR_BODA_COMPLETO } from "@/config/wedding";
 
 export function FormalInvitation() {
   return (
@@ -61,11 +62,11 @@ export function FormalInvitation() {
 
             <Reveal delay={0.5} variant="scale-in">
               <div className="mt-8 space-y-2 font-body text-sm uppercase tracking-cinematic text-ink-light">
-                <p>Sábado 14 de noviembre de 2026</p>
+                <p>Sábado {FECHA_BODA_TEXTO}</p>
                 <p className="font-display text-lg normal-case tracking-normal text-olive-900">
-                  6:00 p.m.
+                  {HORA_BODA_TEXTO}
                 </p>
-                <p>Hacienda Los Olivos, Cochabamba</p>
+                <p>{LUGAR_BODA_COMPLETO}</p>
               </div>
             </Reveal>
 
