@@ -100,7 +100,7 @@ export function tocarPapel(): void {
   const t = c.currentTime;
   const env = c.createGain();
   env.gain.setValueAtTime(0.0001, t);
-  env.gain.exponentialRampToValueAtTime(0.28, t + 0.16);
+  env.gain.exponentialRampToValueAtTime(0.22, t + 0.16);
   env.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
 
   src.connect(filtro);
@@ -110,7 +110,8 @@ export function tocarPapel(): void {
   src.stop(t + 0.9);
 }
 
-/** Crack del sello: transiente seco de alta frecuencia + golpe grave corto. */
+/** Crack del sello: transiente seco de alta frecuencia + golpe grave corto,
+ *  calibrado suave para no caer en "impacto" dramático. */
 export function tocarCrack(): void {
   if (!listo()) return;
   const c = ctx as AudioContext;
@@ -123,8 +124,8 @@ export function tocarCrack(): void {
   hp.frequency.value = 3200;
 
   const envFrio = c.createGain();
-  envFrio.gain.setValueAtTime(0.5, t);
-  envFrio.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+  envFrio.gain.setValueAtTime(0.4, t);
+  envFrio.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
 
   frio.connect(hp);
   hp.connect(envFrio);
@@ -134,16 +135,16 @@ export function tocarCrack(): void {
 
   const grave = c.createOscillator();
   grave.type = "triangle";
-  grave.frequency.setValueAtTime(170, t);
-  grave.frequency.exponentialRampToValueAtTime(55, t + 0.28);
+  grave.frequency.setValueAtTime(120, t);
+  grave.frequency.exponentialRampToValueAtTime(58, t + 0.24);
   const envGrave = c.createGain();
-  envGrave.gain.setValueAtTime(0.32, t);
-  envGrave.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+  envGrave.gain.setValueAtTime(0.24, t);
+  envGrave.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
 
   grave.connect(envGrave);
   envGrave.connect(master as GainNode);
   grave.start(t);
-  grave.stop(t + 0.32);
+  grave.stop(t + 0.3);
 }
 
 /** Timbre suave estilo music box al revelar los nombres. */
