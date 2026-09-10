@@ -271,13 +271,119 @@ begin
       ),
       '[]'::jsonb
     ),
-    'mesa', (select to_jsonb(m) from mesas m where m.id = g.mesa_id)
+    'mesa', (select to_jsonb(m) from mesas m where m.id = g.mesa_id),
+    -- Plano completo del salón con sus posiciones REALES: el croquis que
+    -- ve el invitado sale de la BD, no de una constante compilada en el
+    -- frontend (la pestaña Mesas del panel permite moverlas).
+    'mesas', coalesce(
+      (
+        select jsonb_agg(
+          jsonb_build_object(
+            'id', m.id,
+            'numero', m.numero,
+            'nombre', m.nombre,
+            'capacidad', m.capacidad,
+            'pos_x', m.pos_x,
+            'pos_y', m.pos_y
+          )
+          order by m.numero
+        )
+        from mesas m
+      ),
+      '[]'::jsonb
+    )
   ) into v_json
   from grupos_invitacion g
   where g.id = v_grupo.id;
 
   return v_json;
 end;
+$$;
+
+-- ---------------------------------------------------------------------
+-- 6b. FUNCIÓN RPC: kpi_graficos (RF-09b)
+-- Agregados para los gráficos del panel, calculados EN EL SERVIDOR para no
+-- descargar todos los invitados al navegador. Es SECURITY INVOKER: un `anon`
+-- o `authenticated` sin perfil admin no ve filas (RLS sin policy = 0 filas),
+-- así que las agregaciones devuelven arrays vacíos y nada se filtra.
+-- ---------------------------------------------------------------------
+
+create or replace function kpi_graficos()
+returns jsonb
+language sql
+set search_path = public
+as $$
+  select jsonb_build_object(
+    'por_categoria', (
+      select coalesce(
+        jsonb_agg(
+          jsonb_build_object('categoria', c.categoria, 'grupos', c.grupos)
+          order by c.grupos desc
+        ),
+        '[]'::jsonb
+      )
+      from (
+        select g.categoria, count(*) as grupos
+        from grupos_invitacion g
+        group by g.categoria
+      ) c
+    ),
+    'por_estado', (
+      select coalesce(
+        jsonb_agg(
+          jsonb_build_object('estado', e.estado, 'grupos', e.grupos)
+          order by e.grupos desc
+        ),
+        '[]'::jsonb
+      )
+      from (
+        select g.estado, count(*) as grupos
+        from grupos_invitacion g
+        group by g.estado
+      ) e
+    ),
+    -- Serie acumulada de confirmaciones por día, en la zona horaria del
+    -- evento (Cochabamba, -04:00) para que coincida con el countdown.
+    'serie_tiempo', (
+      select coalesce(
+        jsonb_agg(
+          jsonb_build_object(
+            'fecha', to_char(d.fecha, 'YYYY-MM-DD'),
+            'acumulado', d.acumulado
+          )
+          order by d.fecha
+        ),
+        '[]'::jsonb
+      )
+      from (
+        select
+          fecha,
+          sum(cantidad) over (order by fecha) as acumulado
+        from (
+          select
+            (g.respondido_en at time zone 'America/La_Paz')::date as fecha,
+            count(*) as cantidad
+          from grupos_invitacion g
+          where g.estado = 'confirmed' and g.respondido_en is not null
+          group by (g.respondido_en at time zone 'America/La_Paz')::date
+        ) d0
+      ) d
+    )
+  );
+$$;
+
+-- Historial anti-abuso para el detalle de un grupo (RF-06). Al ser
+-- SECURITY INVOKER, solo devuelve filas si RLS lo permite (admin).
+create or replace function obtener_historial_rsvp(p_grupo_id uuid)
+returns setof rsvp_intentos
+language sql
+set search_path = public
+as $$
+  select *
+  from rsvp_intentos
+  where grupo_id = p_grupo_id
+  order by creado_en desc
+  limit 20;
 $$;
 
 -- ---------------------------------------------------------------------
@@ -379,6 +485,15 @@ create policy admin_read_own_profile
   to authenticated
   using (auth.uid() = id);
 
+-- Lectura del historial de intentos de RSVP (solo admin). Sin esta policy,
+-- ni siquiera obtener_historial_rsvp devolvería filas (RLS = 0 filas).
+drop policy if exists admin_select_intentos on rsvp_intentos;
+create policy admin_select_intentos
+  on rsvp_intentos
+  for select
+  to authenticated
+  using (exists (select 1 from admin_profiles ap where ap.id = auth.uid()));
+
 -- ---------------------------------------------------------------------
 -- 9. PRIVILEGIOS
 --    * Funciones RPC ejecutables por anon/authenticated (puerta de entrada).
@@ -390,6 +505,12 @@ revoke select on kpi_resumen from anon;
 
 grant execute on function submit_rsvp(uuid, estado_invitacion, text, jsonb) to anon, authenticated;
 grant execute on function obtener_grupo(uuid) to anon, authenticated;
+
+-- Agregados y detalle del panel: solo administradores autenticados.
+revoke execute on function kpi_graficos() from public, anon;
+grant execute on function kpi_graficos() to authenticated;
+revoke execute on function obtener_historial_rsvp(uuid) from public, anon;
+grant execute on function obtener_historial_rsvp(uuid) to authenticated;
 
 -- ---------------------------------------------------------------------
 -- 10. DATOS DE EJEMPLO (idempotente — no duplica si ya existen)

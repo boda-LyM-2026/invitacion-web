@@ -47,6 +47,8 @@ export interface GrupoInvitacion {
   creado_en: string;
   acompanantes: Acompanante[];
   mesa?: Mesa | null;
+  /** Plano completo del salón (RPC obtener_grupo), para pintar el croquis. */
+  mesas?: Mesa[];
 }
 
 export interface KpiResumen {
@@ -58,6 +60,20 @@ export interface KpiResumen {
   pendientes_grupos: number;
   tasa_confirmacion: number;
   tasa_rechazo: number;
+}
+
+/** Agregados para los gráficos del panel (RPC `kpi_graficos`, servidor). */
+export interface KpiGraficos {
+  por_categoria: Array<{ categoria: CategoriaInvitado; grupos: number }>;
+  por_estado: Array<{ estado: EstadoInvitacion; grupos: number }>;
+  serie_tiempo: Array<{ fecha: string; acumulado: number }>;
+}
+
+/** Fila del historial de intentos de RSVP de un grupo. */
+export interface RSVPAttempt {
+  id: string;
+  grupo_id: string;
+  creado_en: string;
 }
 
 export interface RsvpPayload {

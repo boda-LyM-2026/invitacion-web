@@ -77,7 +77,9 @@ src/
 │   │   ├── confirmed/    Escenario B: Countdown, LocationSection,
 │   │   │                  Timeline, TableAssignment, Recommendations
 │   │   └── declined/     Escenario C: ThankYouScreen
-│   └── admin/            KpiCard, DashboardCharts, GuestsTable, GuestFormModal
+│   └── admin/            KpiCard, DashboardCharts, GuestsTable, GuestFormModal,
+│                         GuestDetailModal, ImportGuestsModal, MesasTable,
+│                         MesaFormModal, ConfirmDialog, ToastProvider
 ├── config/
 │   ├── wedding.ts        DATOS DE LA BODA (fecha, hora, lugar, nombres) —
 │   │                     única fuente: aquí se cambian, no en los componentes
@@ -90,9 +92,10 @@ src/
 ├── pages/
 │   ├── InvitationPage.tsx      resuelve token → decide escenario
 │   ├── NotFoundPage.tsx
-│   └── admin/                  LoginPage, AdminLayout, DashboardPage, GuestsPage
-├── hooks/                useGrupoInvitacion, useRsvp, useCountdown,
-│                          useAuth, useKpis, useGuestsAdmin
+│   └── admin/                  LoginPage, AdminLayout, DashboardPage,
+│                               GuestsPage, MesasPage
+├── hooks/                useGrupoInvitacion, useRsvp, useCountdown, useAuth,
+│                         useKpis, useGuestsAdmin, useMesasAdmin, useToast
 ├── lib/
 │   ├── supabase.ts       cliente Supabase
 │   ├── validacion.ts     esUuid() — valida el token antes de consultar
@@ -143,7 +146,8 @@ admin_profiles ── auth.users     -- puerta del panel administrativo
   sobre ella está **revocado para `anon`** (solo pasan los autenticados en
   `admin_profiles`).
 - **`rsvp_intentos`**: tabla de rate-limiting (máx. 10 envíos por grupo en la
-  última hora).
+  última hora). El panel lee su historial por grupo vía `obtener_historial_rsvp`
+  (solo admin).
 - **`admin_profiles`**: gate del admin. Una política solo se activa si el
   usuario autenticado tiene fila en esta tabla.
 
@@ -157,7 +161,10 @@ eliminado del esquema). El acceso público queda así:
 | Ver invitación del invitado | RPC `obtener_grupo(uuid)` (SECURITY DEFINER) | devuelve solo el grupo exacto por token, o `null` |
 | Enviar RSVP | RPC `submit_rsvp(uuid, estado, mensaje, acompañantes jsonb)` | valida `limite_personas`, enums y rate-limit en el servidor |
 | Leer/ver el panel admin | `select` con políticas RLS | usuario en `admin_profiles` |
+| Agregados de gráficos del panel | RPC `kpi_graficos()` | `revoke` de `anon`/`public`; solo `authenticated` |
+| Historial de intentos de RSVP | RPC `obtener_historial_rsvp(uuid)` | solo `authenticated` + policy de lectura en `rsvp_intentos` |
 | CRUD de invitados (admin) | `insert/update/delete` | usuario en `admin_profiles` |
+| CRUD de mesas (admin) | `insert/update/delete` | usuario en `admin_profiles` |
 | `kpi_resumen` | `select` | revocado de `anon`, solo admin |
 
 El cliente nunca consulta `grupos_invitacion`/`acompanantes` directamente con
@@ -214,6 +221,23 @@ Antes de publicar en producción, faltan dos assets (ver pendientes):
 - **Intro realista**: física de sobre, sello fragmentado, audio sintetizado,
   luz/papel, ritmo compacto (~10 s) y carta sin zoom gigante.
 
+### Mejoras del panel admin (tanda posterior)
+
+- **Gráficos del servidor**: nuevo RPC `kpi_graficos()`; el Dashboard ya no
+  descarga todos los invitados para dibujar. KPIs y gráficos se refrescan en
+  tiempo real vía `postgres_changes` (antes solo los KPIs).
+- **8 KPIs**: ahora también personas confirmadas y tasa de rechazo.
+- **Invitados**: búsqueda por grupo/invitado, orden por columnas, paginación
+  (10/20/50), columna con personas confirmadas reales `X / Y`, enlace de
+  WhatsApp, modal de detalle con acompañantes/mensaje/historial de intentos
+  (`obtener_historial_rsvp`).
+- **Gestión de mesas**: página `/admin/mesas` con CRUD, ocupación por mesa y
+  alerta de sobrecupo; el formulario de invitado ahora asigna mesa y estado.
+- **Importación masiva**: botón "Importar" (CSV/Excel vía `xlsx` bajo
+  demanda) con preview y alta en lote.
+- **UX**: sistema de toasts (`useToast`), confirmación elegante con
+  `ConfirmDialog` (fuera `window.confirm`) y feedback de error en CRUD.
+
 ## 7. Pendientes / próximos pasos
 
 Prioridad alta (bloquean producción):
@@ -227,10 +251,8 @@ Prioridad alta (bloquean producción):
 
 Mejoras de producto:
 
-- [ ] Importación masiva de invitados por CSV en el panel (reusar `xlsx`,
-      hoy el alta es una por una).
-- [ ] Envío de enlaces personalizados (`/invitacion/{access_token}`) por
-      WhatsApp/email — no incluido aún.
+- [ ] Envío masivo de enlaces personalizados (`/invitacion/{access_token}`)
+      por WhatsApp/email — hoy se copia/comparte uno a uno desde el panel.
 - [ ] Ampliar la cobertura de tests de Vitest más allá de `fechas` y `stats`
       (validación del RPC, lógica de escenarios).
 - [ ] Auditar quién hizo cada cambio (los admin ya pueden rastrearse vía

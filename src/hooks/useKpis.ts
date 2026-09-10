@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import type { KpiResumen } from "@/types/domain";
+import { MOCK_GRUPOS } from "@/data/mockInvitados";
+import { buildChartsDesdeGrupos } from "@/lib/stats";
+import type { KpiResumen, KpiGraficos } from "@/types/domain";
 
 const KPI_DEMO: KpiResumen = {
   total_grupos: 86,
@@ -14,12 +16,14 @@ const KPI_DEMO: KpiResumen = {
 };
 
 /**
- * RF-09: KPIs en tiempo real. En Supabase, `kpi_resumen` es una vista
- * (ver supabase/schema.sql) para evitar traer todas las filas al cliente
- * y calcular agregados en el navegador.
+ * RF-09: KPIs en tiempo real. `kpi_resumen` es una vista del servidor
+ * (supabase/schema.sql). Los agregados de los gráficos vienen del RPC
+ * `kpi_graficos()` para no descargar todos los invitados al navegador.
+ * En modo demo (sin Supabase) se derivan de MOCK_GRUPOS en el cliente.
  */
 export function useKpis() {
   const [kpis, setKpis] = useState<KpiResumen | null>(null);
+  const [charts, setCharts] = useState<KpiGraficos | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,18 +31,24 @@ export function useKpis() {
       setLoading(true);
       if (!isSupabaseConfigured) {
         setKpis(KPI_DEMO);
+        setCharts(buildChartsDesdeGrupos(Object.values(MOCK_GRUPOS)));
         setLoading(false);
         return;
       }
-      const { data } = await supabase.from("kpi_resumen").select("*").maybeSingle();
-      setKpis((data as KpiResumen) ?? KPI_DEMO);
+      const [{ data: kpi }, { data: graf }] = await Promise.all([
+        supabase.from("kpi_resumen").select("*").maybeSingle(),
+        supabase.rpc("kpi_graficos"),
+      ]);
+      setKpis((kpi as KpiResumen | null) ?? KPI_DEMO);
+      setCharts((graf as KpiGraficos | null) ?? null);
       setLoading(false);
     }
     void load();
 
     if (!isSupabaseConfigured) return;
 
-    // Tiempo real: cualquier cambio en grupos_invitacion refresca los KPIs.
+    // Tiempo real: cualquier cambio en grupos_invitacion (RSVP o alta
+    // administrativa) refresca KPIs y gráficos.
     const channel = supabase
       .channel("kpi-changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "grupos_invitacion" }, () => {
@@ -51,5 +61,5 @@ export function useKpis() {
     };
   }, []);
 
-  return { kpis, loading };
+  return { kpis, charts, loading };
 }

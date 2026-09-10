@@ -6,9 +6,19 @@ import type { Mesa } from "@/types/domain";
 
 interface TableAssignmentProps {
   mesa: Mesa | null | undefined;
+  /** Plano completo salido de la BD; en demo/no disponible se cae al croquis estático. */
+  mesas?: Mesa[];
 }
 
-export function TableAssignment({ mesa }: TableAssignmentProps) {
+interface PuntoPlano {
+  numero: number;
+  pos_x: number;
+  pos_y: number;
+}
+
+export function TableAssignment({ mesa, mesas }: TableAssignmentProps) {
+  const plano: PuntoPlano[] =
+    mesas && mesas.length > 0 ? mesas : MESAS_REFERENCIA;
   return (
     <section className="section-cinematic film-grain">
       {/* Background image */}
@@ -59,7 +69,7 @@ export function TableAssignment({ mesa }: TableAssignmentProps) {
           <p className="eyebrow absolute left-6 top-4 text-olive">Croquis del salón</p>
 
           {/* Animated tables */}
-          {MESAS_REFERENCIA.map((ref, i) => {
+          {plano.map((ref, i) => {
             const esLaMia = mesa?.numero === ref.numero;
             return (
               <motion.div

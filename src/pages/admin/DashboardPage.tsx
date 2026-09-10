@@ -1,14 +1,12 @@
 import { motion } from "framer-motion";
 import { useKpis } from "@/hooks/useKpis";
-import { useGuestsAdmin } from "@/hooks/useGuestsAdmin";
 import { KpiCard } from "@/components/admin/KpiCard";
 import { DashboardCharts } from "@/components/admin/DashboardCharts";
 
 export default function DashboardPage() {
-  const { kpis, loading: kpisLoading } = useKpis();
-  const { grupos, loading: gruposLoading } = useGuestsAdmin();
+  const { kpis, charts, loading } = useKpis();
 
-  if (kpisLoading || gruposLoading || !kpis) {
+  if (loading || !kpis) {
     return (
       <motion.p
         className="text-ink-muted"
@@ -33,16 +31,18 @@ export default function DashboardPage() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         <KpiCard label="Grupos totales" value={kpis.total_grupos} />
         <KpiCard label="Personas esperadas" value={kpis.total_personas_esperadas} />
-        <KpiCard label="Confirmados" value={kpis.confirmados_grupos} accent />
+        <KpiCard label="Confirmados (grupos)" value={kpis.confirmados_grupos} accent />
+        <KpiCard label="Confirmados (personas)" value={kpis.confirmados_personas} accent />
         <KpiCard label="Rechazados" value={kpis.rechazados_grupos} />
         <KpiCard label="Pendientes" value={kpis.pendientes_grupos} />
         <KpiCard label="Tasa confirmación" value={`${kpis.tasa_confirmacion.toFixed(1)}%`} accent />
+        <KpiCard label="Tasa rechazo" value={`${kpis.tasa_rechazo.toFixed(1)}%`} />
       </div>
 
-      <DashboardCharts grupos={grupos} />
+      <DashboardCharts charts={charts ?? null} />
     </div>
   );
 }
