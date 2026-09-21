@@ -27,19 +27,30 @@ export function FormalInvitation() {
 
             <p className="eyebrow text-olive/60">Con la bendición de Dios y de nuestros padres</p>
 
-            <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2">
-              <Reveal delay={0.2} variant="fade-left">
+            <div className="mx-auto mt-8 max-w-md space-y-8">
+              <Reveal delay={0.2} variant="fade-up">
                 <div>
                   <p className="eyebrow text-olive">Padres de la novia</p>
-                  <p className="mt-3 font-display text-2xl font-light text-olive-900">Rosa Delgado</p>
-                  <p className="font-display text-2xl font-light text-olive-900">Fernando Vega</p>
+                  <p className="mt-4 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Victor Vaca Vasquez
+                  </p>
+                  <p className="mt-1 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Mariza Lozano Ribeiro
+                  </p>
                 </div>
               </Reveal>
-              <Reveal delay={0.3} variant="fade-right">
+
+              <p className="font-display text-2xl italic leading-none text-olive/60">y</p>
+
+              <Reveal delay={0.3} variant="fade-up">
                 <div>
                   <p className="eyebrow text-olive">Padres del novio</p>
-                  <p className="mt-3 font-display text-2xl font-light text-olive-900">Elena Suárez</p>
-                  <p className="font-display text-2xl font-light text-olive-900">Ricardo Vargas</p>
+                  <p className="mt-4 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Juan Carlos Viamont Alpire
+                  </p>
+                  <p className="mt-1 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Claudia Cecilia Rico Ramallo
+                  </p>
                 </div>
               </Reveal>
             </div>

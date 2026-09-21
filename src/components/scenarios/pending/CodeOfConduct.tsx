@@ -4,8 +4,6 @@ import { OliveDivider } from "@/components/shared/OliveDivider";
 
 const REGLAS = [
   "Es una celebración solo para adultos; agradecemos dejar a los peques en casa, salvo indicación contraria en tu invitación.",
-  "El código de vestimenta es formal, tonos tierra y verdes son bienvenidos.",
-  "Pedimos evitar el color blanco, champagne y verde pistacho: son los tonos de la boda.",
   "Por favor confirma tu asistencia antes del 1 de octubre para poder organizar mesas y menú.",
 ];
 

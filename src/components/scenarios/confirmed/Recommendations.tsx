@@ -38,9 +38,15 @@ function WarningIcon({ className = "w-6 h-6" }: { className?: string }) {
 
 const GRUPOS = [
   {
-    titulo: "Código de vestimenta",
+    titulo: "DRESS CODE",
     Icon: ShirtIcon,
-    items: ["Formal / cocktail elegante", "Tonos tierra, verdes y neutros", "Evitar blanco, champagne y verde pistacho"],
+    plain: true,
+    items: [
+      "Formal & Elegante",
+      "Queremos verte lucir increíble ✨",
+      "Te pedimos reservar el blanco y tonos similares para la novia",
+      "¡Gracias por acompañarnos en este día tan especial! 🤍",
+    ],
   },
   {
     titulo: "Código de conducta",
@@ -87,6 +93,26 @@ export function Recommendations() {
                     {grupo.titulo}
                   </h3>
                 </div>
+                {grupo.plain ? (
+                  <div className="mt-4 space-y-3">
+                    {grupo.items.map((item, j) => (
+                      <motion.p
+                        key={item}
+                        className={
+                          j === 0
+                            ? "font-display text-lg font-light italic text-champagne"
+                            : "font-body text-sm leading-relaxed text-alabaster/85"
+                        }
+                        initial={{ opacity: 0, y: 8 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.4 + i * 0.15 + j * 0.1 }}
+                      >
+                        {item}
+                      </motion.p>
+                    ))}
+                  </div>
+                ) : (
                 <ul className="mt-4 space-y-3">
                   {grupo.items.map((item, j) => (
                     <motion.li
@@ -102,6 +128,7 @@ export function Recommendations() {
                     </motion.li>
                   ))}
                 </ul>
+                )}
               </motion.div>
             </Reveal>
           ))}
