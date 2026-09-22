@@ -3,8 +3,7 @@ import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
 import { useCountdown } from "@/hooks/useCountdown";
 import { ParticleField } from "@/components/shared/ParticleField";
-
-const FECHA_BODA = (import.meta.env.VITE_WEDDING_DATETIME as string) ?? "2026-11-14T18:00:00-04:00";
+import { FECHA_BODA_ISO } from "@/config/wedding";
 
 const UNIDADES: Array<{ key: "dias" | "horas" | "minutos" | "segundos"; label: string }> = [
   { key: "dias", label: "Días" },
@@ -14,7 +13,7 @@ const UNIDADES: Array<{ key: "dias" | "horas" | "minutos" | "segundos"; label: s
 ];
 
 export function Countdown() {
-  const cuenta = useCountdown(FECHA_BODA);
+  const cuenta = useCountdown(FECHA_BODA_ISO);
 
   return (
     <section className="section-cinematic relative overflow-hidden">

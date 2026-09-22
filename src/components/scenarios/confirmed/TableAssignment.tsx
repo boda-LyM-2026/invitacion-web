@@ -1,27 +1,24 @@
 import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
+import { MESAS_REFERENCIA } from "@/data/mesas";
 import type { Mesa } from "@/types/domain";
 
 interface TableAssignmentProps {
   mesa: Mesa | null | undefined;
+  /** Plano completo salido de la BD; en demo/no disponible se cae al croquis estático. */
+  mesas?: Mesa[];
 }
 
-const MESAS_REFERENCIA: Array<Pick<Mesa, "numero" | "pos_x" | "pos_y">> = [
-  { numero: 1, pos_x: 15, pos_y: 20 },
-  { numero: 2, pos_x: 38, pos_y: 15 },
-  { numero: 3, pos_x: 62, pos_y: 15 },
-  { numero: 4, pos_x: 85, pos_y: 20 },
-  { numero: 5, pos_x: 15, pos_y: 50 },
-  { numero: 6, pos_x: 38, pos_y: 50 },
-  { numero: 7, pos_x: 62, pos_y: 50 },
-  { numero: 8, pos_x: 85, pos_y: 50 },
-  { numero: 9, pos_x: 25, pos_y: 80 },
-  { numero: 10, pos_x: 50, pos_y: 80 },
-  { numero: 11, pos_x: 75, pos_y: 80 },
-];
+interface PuntoPlano {
+  numero: number;
+  pos_x: number;
+  pos_y: number;
+}
 
-export function TableAssignment({ mesa }: TableAssignmentProps) {
+export function TableAssignment({ mesa, mesas }: TableAssignmentProps) {
+  const plano: PuntoPlano[] =
+    mesas && mesas.length > 0 ? mesas : MESAS_REFERENCIA;
   return (
     <section className="section-cinematic film-grain">
       {/* Background image */}
@@ -72,7 +69,7 @@ export function TableAssignment({ mesa }: TableAssignmentProps) {
           <p className="eyebrow absolute left-6 top-4 text-olive">Croquis del salón</p>
 
           {/* Animated tables */}
-          {MESAS_REFERENCIA.map((ref, i) => {
+          {plano.map((ref, i) => {
             const esLaMia = mesa?.numero === ref.numero;
             return (
               <motion.div

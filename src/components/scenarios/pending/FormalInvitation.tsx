@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
+import { FECHA_BODA_TEXTO, HORA_BODA_TEXTO, LUGAR_BODA_COMPLETO } from "@/config/wedding";
 
 export function FormalInvitation() {
   return (
@@ -26,19 +27,30 @@ export function FormalInvitation() {
 
             <p className="eyebrow text-olive/60">Con la bendición de Dios y de nuestros padres</p>
 
-            <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2">
-              <Reveal delay={0.2} variant="fade-left">
+            <div className="mx-auto mt-8 max-w-md space-y-8">
+              <Reveal delay={0.2} variant="fade-up">
                 <div>
                   <p className="eyebrow text-olive">Padres de la novia</p>
-                  <p className="mt-3 font-display text-2xl font-light text-olive-900">Rosa Delgado</p>
-                  <p className="font-display text-2xl font-light text-olive-900">Fernando Vega</p>
+                  <p className="mt-4 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Victor Vaca Vasquez
+                  </p>
+                  <p className="mt-1 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Mariza Lozano Ribeiro
+                  </p>
                 </div>
               </Reveal>
-              <Reveal delay={0.3} variant="fade-right">
+
+              <p className="font-display text-2xl italic leading-none text-olive/60">y</p>
+
+              <Reveal delay={0.3} variant="fade-up">
                 <div>
                   <p className="eyebrow text-olive">Padres del novio</p>
-                  <p className="mt-3 font-display text-2xl font-light text-olive-900">Elena Suárez</p>
-                  <p className="font-display text-2xl font-light text-olive-900">Ricardo Vargas</p>
+                  <p className="mt-4 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Juan Carlos Viamont Alpire
+                  </p>
+                  <p className="mt-1 font-display text-2xl font-light leading-relaxed text-olive-900">
+                    Claudia Cecilia Rico Ramallo
+                  </p>
                 </div>
               </Reveal>
             </div>
@@ -61,11 +73,11 @@ export function FormalInvitation() {
 
             <Reveal delay={0.5} variant="scale-in">
               <div className="mt-8 space-y-2 font-body text-sm uppercase tracking-cinematic text-ink-light">
-                <p>Sábado 14 de noviembre de 2026</p>
+                <p>Sábado {FECHA_BODA_TEXTO}</p>
                 <p className="font-display text-lg normal-case tracking-normal text-olive-900">
-                  6:00 p.m.
+                  {HORA_BODA_TEXTO}
                 </p>
-                <p>Hacienda Los Olivos, Cochabamba</p>
+                <p>{LUGAR_BODA_COMPLETO}</p>
               </div>
             </Reveal>
 

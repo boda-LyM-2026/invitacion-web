@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { esUuid } from "@/lib/validacion";
 import { MOCK_GRUPOS } from "@/data/mockInvitados";
 import type { GrupoInvitacion } from "@/types/domain";
 
@@ -41,18 +42,20 @@ export function useGrupoInvitacion(accessToken: string | undefined): UseGrupoInv
       return;
     }
 
-    const { data, error: queryError } = await supabase
-      .from("grupos_invitacion")
-      .select(
-        `
-        id, access_token, nombre_grupo, invitado_principal, limite_personas,
-        categoria, importancia, estado, mesa_id, mensaje_rsvp, respondido_en, creado_en,
-        acompanantes ( id, grupo_id, nombre_completo, es_nino, confirmado ),
-        mesa:mesas ( id, numero, nombre, capacidad, pos_x, pos_y )
-      `,
-      )
-      .eq("access_token", accessToken)
-      .maybeSingle();
+    // Los tokens reales son UUIDv4. Validar evita enviar "foo" al RPC
+    // (el tipo uuid de Postgres respondería con un 400).
+    if (!esUuid(accessToken)) {
+      setError("Enlace de invitación inválido.");
+      setGrupo(null);
+      setLoading(false);
+      return;
+    }
+
+    // Lectura pública SOLO vía RPC security-definer (ver supabase/schema.sql):
+    // localiza el grupo por access_token exacto y devuelve acompañantes + mesa.
+    const { data, error: queryError } = await supabase.rpc("obtener_grupo", {
+      p_access_token: accessToken,
+    });
 
     if (queryError) {
       setError("No pudimos cargar tu invitación. Intenta de nuevo en unos segundos.");

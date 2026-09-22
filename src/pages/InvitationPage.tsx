@@ -12,6 +12,7 @@ import { AudioPlayer } from "@/components/shared/AudioPlayer";
 
 import { OurStory } from "@/components/scenarios/pending/OurStory";
 import { FormalInvitation } from "@/components/scenarios/pending/FormalInvitation";
+import { DressCode } from "@/components/scenarios/pending/DressCode";
 import { CodeOfConduct } from "@/components/scenarios/pending/CodeOfConduct";
 import { RsvpForm } from "@/components/scenarios/pending/RsvpForm";
 
@@ -113,7 +114,7 @@ export default function InvitationPage() {
             <Countdown />
             <LocationSection />
             <Timeline />
-            <TableAssignment mesa={grupo.mesa} />
+            <TableAssignment mesa={grupo.mesa} mesas={grupo.mesas} />
             <Recommendations />
             <Footer />
           </motion.main>
@@ -139,6 +140,7 @@ export default function InvitationPage() {
           <Hero nombreInvitado={grupo.invitado_principal} />
           <OurStory />
           <FormalInvitation />
+          <DressCode />
           <CodeOfConduct />
           <RsvpForm grupo={grupo} onSuccess={refetch} />
           <Footer />

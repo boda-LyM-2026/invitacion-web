@@ -1,23 +1,28 @@
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
 
-function CoffeeIcon({ className = "w-6 h-6" }: { className?: string }) {
+function GraduationIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
-      <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
-      <line x1="6" y1="2" x2="6" y2="4" />
-      <line x1="10" y1="2" x2="10" y2="4" />
-      <line x1="14" y1="2" x2="14" y2="4" />
+      <path d="M22 10 12 5 2 10l10 5 10-5Z" />
+      <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
     </svg>
   );
 }
 
-function HomeIcon({ className = "w-6 h-6" }: { className?: string }) {
+function HeartIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-      <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      <path d="M12 21 5 14" />
+    </svg>
+  );
+}
+
+function SparklesIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3Z" />
     </svg>
   );
 }
@@ -35,21 +40,27 @@ function RingIcon({ className = "w-6 h-6" }: { className?: string }) {
 
 const HITOS = [
   {
-    anio: "2019",
-    titulo: "Un café que se alargó",
-    texto: "Se conocieron en la boda de un amigo en común y terminaron hablando hasta que apagaron las luces del salón.",
-    Icon: CoffeeIcon,
+    anio: "2018",
+    titulo: "Donde todo comenzó",
+    texto: "Nos conocimos en la universidad gracias a unos amigos en común. En ese momento quedó solo como un encuentro, sin imaginar todo lo que vendría después.",
+    Icon: GraduationIcon,
+  },
+  {
+    anio: "2020",
+    titulo: "Cuando nació el amor",
+    texto: "En plena pandemia comenzamos a hablar cada vez más. Entre mensajes, risas y nuestras primeras salidas, poco a poco dejamos de ser solo amigos.",
+    Icon: HeartIcon,
   },
   {
     anio: "2021",
-    titulo: "La primera casa",
-    texto: "Adoptaron a Oliva, su perrita, y con ella llegó la costumbre de las caminatas de domingo.",
-    Icon: HomeIcon,
+    titulo: "Nuestra historia",
+    texto: "En enero decidimos comenzar oficialmente esta aventura juntos. Desde entonces, hemos crecido, aprendido y compartido la vida de la mano.",
+    Icon: SparklesIcon,
   },
   {
     anio: "2025",
-    titulo: "La pregunta",
-    texto: "Mauricio le propuso matrimonio en el mismo mirador de su primera cita, con la misma canción de fondo.",
+    titulo: "El gran sí",
+    texto: "En noviembre llegó la pregunta que cambiaría nuestro siguiente capítulo. Dijimos sí a una vida juntos y comenzamos a soñar con nuestra boda.",
     Icon: RingIcon,
   },
 ];

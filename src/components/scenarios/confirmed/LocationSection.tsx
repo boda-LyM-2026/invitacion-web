@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
+import { LUGAR_BODA, LUGAR_BODA_COMPLETO } from "@/config/wedding";
 
 const FOTOS = [
   "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000&auto=format&fit=crop",
@@ -9,7 +10,7 @@ const FOTOS = [
   "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=1000&auto=format&fit=crop",
 ];
 
-const DIRECCION = "Hacienda Los Olivos, Km 8 Carretera a Sacaba, Cochabamba, Bolivia";
+const DIRECCION = LUGAR_BODA_COMPLETO;
 const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(DIRECCION)}&output=embed`;
 
 export function LocationSection() {
@@ -28,7 +29,7 @@ export function LocationSection() {
         <Reveal className="text-center" variant="fade-up">
           <p className="eyebrow">El lugar</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
-            Hacienda Los Olivos
+            {LUGAR_BODA}
           </h2>
           <OliveDivider className="text-pistachio-400" />
         </Reveal>
@@ -40,7 +41,9 @@ export function LocationSection() {
               <motion.img
                 key={activa}
                 src={FOTOS[activa]}
-                alt={`Hacienda Los Olivos, vista ${activa + 1}`}
+                alt={`${LUGAR_BODA}, vista ${activa + 1}`}
+                width={1000}
+                height={667}
                 className="absolute inset-0 h-full w-full object-cover"
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -90,8 +93,11 @@ export function LocationSection() {
             <iframe
               title="Ubicación del evento"
               src={MAPS_EMBED_SRC}
+              width="600"
+              height="256"
               className="h-64 w-full border-0"
               loading="lazy"
+              allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
             />
             <div className="pointer-events-none absolute inset-0 rounded-[28px] ring-1 ring-inset ring-olive/10" />

@@ -16,6 +16,21 @@ interface Particle {
   opacitySpeed: number;
 }
 
+/** Convierte "rgba(r,g,b,a)" o "#rrggbb" en "rgba(r,g,b,A)" con la opacidad indicada. */
+function colorConOpacidad(base: string, opacidad: number): string {
+  const a = Math.max(0, Math.min(1, opacidad));
+  const rgba = base.match(/rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/i);
+  if (rgba) {
+    return `rgba(${rgba[1]}, ${rgba[2]}, ${rgba[3]}, ${a})`;
+  }
+  const hex = base.match(/^#([0-9a-f]{6})$/i);
+  if (hex) {
+    const n = parseInt(hex[1], 16);
+    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+  }
+  return base;
+}
+
 export function ParticleField({
   count = 30,
   color = "rgba(231,219,203,0.6)",
@@ -24,6 +39,7 @@ export function ParticleField({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animationRef = useRef<number>();
+  const runningRef = useRef(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -56,28 +72,29 @@ export function ParticleField({
     }));
 
     const animate = () => {
+      if (!runningRef.current) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
       ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
 
       particlesRef.current.forEach((p) => {
-        // Update position
         p.x += p.speedX;
         p.y += p.speedY;
 
-        // Update opacity
         p.opacity += p.opacitySpeed;
         if (p.opacity > 0.7 || p.opacity < 0.1) {
           p.opacitySpeed *= -1;
         }
 
-        // Wrap around edges
         if (p.y < -10) p.y = canvas.offsetHeight + 10;
         if (p.x < -10) p.x = canvas.offsetWidth + 10;
         if (p.x > canvas.offsetWidth + 10) p.x = -10;
 
-        // Draw particle
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = color.replace(/[\d.]+\)$/, `${p.opacity})`);
+        ctx.fillStyle = colorConOpacidad(color, p.opacity);
         ctx.fill();
       });
 
@@ -86,7 +103,14 @@ export function ParticleField({
 
     animate();
 
+    // Si el canvas sale del viewport se pausa el trabajo del CPU/GPU.
+    const observer = new IntersectionObserver(([entry]) => {
+      runningRef.current = entry.isIntersecting;
+    });
+    observer.observe(canvas);
+
     return () => {
+      observer.disconnect();
       window.removeEventListener("resize", resize);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);

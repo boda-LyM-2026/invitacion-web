@@ -7,6 +7,7 @@ import { WaxSeal } from "@/components/shared/WaxSeal";
 const LINKS = [
   { to: "/admin", label: "Resumen", end: true },
   { to: "/admin/invitados", label: "Invitados", end: false },
+  { to: "/admin/mesas", label: "Mesas", end: false },
 ];
 
 export default function AdminLayout() {

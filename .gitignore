@@ -4,3 +4,12 @@ dist
 .env.local
 *.log
 .DS_Store
+
+# Artefactos de build / paquetes generados
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Comprimidos
+*.zip
+*.tar.gz
