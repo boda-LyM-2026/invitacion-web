@@ -100,8 +100,8 @@ export function Recommendations() {
                         key={item}
                         className={
                           j === 0
-                            ? "font-display text-lg font-light italic text-champagne"
-                            : "font-body text-sm leading-relaxed text-alabaster/85"
+                            ? "font-display text-lg font-light text-alabaster"
+                            : "font-body text-sm leading-relaxed text-alabaster/80"
                         }
                         initial={{ opacity: 0, y: 8 }}
                         whileInView={{ opacity: 1, y: 0 }}
