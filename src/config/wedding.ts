@@ -9,9 +9,11 @@ export const FECHA_BODA_TEXTO = "14 de noviembre de 2026";
 
 export const HORA_BODA_TEXTO = "6:00 p.m.";
 
-export const LUGAR_BODA = "Hacienda Los Olivos";
+export const LUGAR_BODA = "Salón de Eventos Ensueño";
 
-export const LUGAR_BODA_COMPLETO = "Hacienda Los Olivos, Cochabamba";
+export const LUGAR_BODA_COMPLETO = "Salón de Eventos Ensueño, Tiquipaya, Cochabamba";
+
+export const LUGAR_BODA_MAPS = "https://maps.app.goo.gl/KKBNhSJ2pUvXe4Ae9";
 
 /** ISO con offset usado por el countdown; se puede sobreescribir vía env. */
 export const FECHA_BODA_ISO =
