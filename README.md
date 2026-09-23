@@ -5,8 +5,8 @@ administrativo con KPIs en tiempo real y exportaciones. Construida con
 React + TypeScript + Vite + Framer Motion + TailwindCSS en el frontend y
 Supabase (PostgreSQL + RLS + Auth) en el backend.
 
-> Rama de trabajo activa: **`alvaro`**. `main`/`master` quedan para releases
-> tras revisar el PR.
+> Rama de trabajo: **`main`** (los cambios de `alvaro` ya están fusionados).
+> `master` queda como rama heredada/respaldo.
 
 ## 1. Puesta en marcha
 
@@ -70,9 +70,10 @@ src/
 ├── components/
 │   ├── intro/            IntroSequence (secuencia cinemática + audio Web Audio)
 │   ├── shared/           Hero, Footer, OliveDivider, WaxSeal, Reveal,
-│   │                     ParticleField, AudioPlayer
+│   │                     ParticleField, AudioPlayer, ScrollProgress,
+│   │                     FilmGrain, ParallaxSection
 │   ├── scenarios/
-│   │   ├── pending/      Escenario A: OurStory, FormalInvitation,
+│   │   ├── pending/      Escenario A: OurStory, FormalInvitation, DressCode,
 │   │   │                  CodeOfConduct, RsvpForm
 │   │   ├── confirmed/    Escenario B: Countdown, LocationSection,
 │   │   │                  Timeline, TableAssignment, Recommendations
@@ -238,6 +239,19 @@ Antes de publicar en producción, faltan dos assets (ver pendientes):
 - **UX**: sistema de toasts (`useToast`), confirmación elegante con
   `ConfirmDialog` (fuera `window.confirm`) y feedback de error en CRUD.
 
+### Contenido de la invitación (tanda reciente)
+
+- **Dress code propio**: nueva sección `DressCode` en el escenario pending
+  (separada de `CodeOfConduct`), con la paleta armonizada también en la
+  sección `Recommendations` del escenario confirmado.
+- **FormalInvitation**: se publican los nombres reales de los padres
+  (padres de la novia y del novio) y se refina la redacción de la invitación.
+- **OurStory**: cronología de la historia de la pareja actualizada.
+- **Intro**: ramo de olivo más retorcido y ritmo más sobrio en `IntroSequence`.
+- **Assets locales**: se añadieron fotos reales en `public/images/`
+  (`mesa-fondo-jardin-1.jpg`, `mesa-fondo-jardin-2.jpg`,
+  `tarjetas-con-nombres-invitados.jpg`, etc.) usadas como fondo de sección.
+
 ## 7. Pendientes / próximos pasos
 
 Prioridad alta (bloquean producción):
@@ -246,8 +260,10 @@ Prioridad alta (bloquean producción):
       los organizadores a `admin_profiles` (roundtrip a `auth.users`).
 - [ ] Crear `public/og-portada.png` (1200×630 aprox.) para las meta tags OG.
 - [ ] Subir `public/audio/background-music.mp3` (se oculta solo si falta).
-- [ ] Reemplazar las fotos de Unsplash (`Hero.tsx`, `LocationSection.tsx`)
-      por fotos reales de la pareja.
+      Ya existe `public/audio/README.md` con la guía de formatos y fuentes.
+- [ ] Reemplazar los placeholders de Unsplash (`Hero.tsx` y la galería de
+      `LocationSection.tsx`) por fotos de la pareja. Nota: los **fondos de
+      sección** ya usan imágenes locales de `public/images/`.
 
 Mejoras de producto:
 
