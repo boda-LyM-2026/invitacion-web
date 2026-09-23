@@ -67,13 +67,13 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
   if (exito) {
     return (
       <section id="rsvp" className="section-cinematic relative overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/mesa-fondo-jardin-1.jpg')" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
-        <motion.div
-          className="relative z-10 flex min-h-[50vh] flex-col items-center justify-center text-center"
+<div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/fondo.png')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
+      <motion.div
+        className="relative z-10 flex min-h-[50vh] flex-col items-center justify-center text-center"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
@@ -102,7 +102,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-2.jpg')" }}
+        style={{ backgroundImage: "url('/images/fondo.png')" }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
 

@@ -13,9 +13,9 @@ export function CodeOfConduct() {
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/herramientas-para-cortar-pastel.jpg')" }}
+        style={{ backgroundImage: "url('/images/fondo.png')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">

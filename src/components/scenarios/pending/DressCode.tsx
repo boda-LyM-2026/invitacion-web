@@ -7,9 +7,9 @@ export function DressCode() {
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-2.jpg')" }}
+        style={{ backgroundImage: "url('/images/fondo.png')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">

@@ -71,9 +71,9 @@ export function OurStory() {
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/ramo-de-flores.jpg')" }}
+        style={{ backgroundImage: "url('/images/fondo.png')" }}
       />
-      <div className="absolute inset-0 bg-white/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-white/30" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">
