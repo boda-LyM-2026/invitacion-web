@@ -2,16 +2,16 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
-import { LUGAR_BODA, LUGAR_BODA_COMPLETO } from "@/config/wedding";
+import { LUGAR_BODA, LUGAR_BODA_COMPLETO, LUGAR_BODA_MAPS } from "@/config/wedding";
 
 const FOTOS = [
-  "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?q=80&w=1000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=1000&auto=format&fit=crop",
+  "/images/salon/salon-1.png",
+  "/images/salon/salon-2.png",
+  "/images/salon/salon-3.png",
 ];
 
 const DIRECCION = LUGAR_BODA_COMPLETO;
-const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(DIRECCION)}&output=embed`;
+const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent("Salón de Eventos Ensueño")}&output=embed&z=16`;
 
 export function LocationSection() {
   const [activa, setActiva] = useState(0);
@@ -76,7 +76,7 @@ export function LocationSection() {
         <Reveal delay={0.3} variant="fade-up" className="mt-8 text-center">
           <p className="font-body text-sm text-ink-light">{DIRECCION}</p>
           <motion.a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION)}`}
+            href={LUGAR_BODA_MAPS}
             target="_blank"
             rel="noreferrer"
             className="btn-ghost mt-6 inline-flex"
