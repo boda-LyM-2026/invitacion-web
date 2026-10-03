@@ -7,7 +7,7 @@ export const NOMBRE_NOVIOS = "Lenan & Mauricio";
 
 export const FECHA_BODA_TEXTO = "14 de noviembre de 2026";
 
-export const HORA_BODA_TEXTO = "6:00 p.m.";
+export const HORA_BODA_TEXTO = "2:00 p.m.";
 
 export const LUGAR_BODA = "Salón de Eventos Ensueño";
 
