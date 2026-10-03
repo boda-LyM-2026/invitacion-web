@@ -2,6 +2,7 @@ import { useId, type ReactElement } from "react";
 import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
+import { ParticleField } from "@/components/shared/ParticleField";
 
 type Icono = (props: { className?: string }) => ReactElement;
 
@@ -87,7 +88,7 @@ function PuntoCorazon({ indice }: { indice: number }) {
 
   return (
     <motion.span
-      className="relative z-10 h-6 w-6 shrink-0 rounded-full shadow-glow-gold ring-1 ring-alabaster/40"
+      className="relative z-10 h-6 w-6 shrink-0 rounded-full shadow-glow-olive ring-1 ring-olive/20"
       initial={{ scale: 0.6, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
       viewport={{ once: true }}
@@ -98,8 +99,8 @@ function PuntoCorazon({ indice }: { indice: number }) {
       <svg viewBox="0 0 24 24" className="h-full w-full">
         <defs>
           <linearGradient id={`grad-${uid}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#E7DBCB" />
-            <stop offset="100%" stopColor="#DDD0B8" />
+            <stop offset="0%" stopColor="#969D7B" />
+            <stop offset="100%" stopColor="#6B6F4E" />
           </linearGradient>
           <mask id={`mask-${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
             <circle cx="12" cy="12" r="12" fill="white" />
@@ -125,7 +126,7 @@ function IconoPrograma({ Icon, pegadoALaDerecha }: { Icon: Icono; pegadoALaDerec
       }`}
       whileHover={{ scale: 1.1 }}
     >
-      <Icon className="h-[60px] w-[60px] text-champagne" />
+      <Icon className="h-[60px] w-[60px] text-olive" />
     </motion.div>
   );
 }
@@ -151,7 +152,7 @@ function SegmentoLinea({
       aria-hidden="true"
       className={`pointer-events-none absolute left-1/2 w-px ${
         origen === "top" ? "top-0 h-1/2" : "bottom-0 h-1/2"
-      } ${degradado ?? "bg-champagne/40"}`}
+      } ${degradado ?? "bg-olive/40"}`}
       initial={{ scaleY: 0, x: "-50%" }}
       whileInView={{ scaleY: 1, x: "-50%" }}
       viewport={{ once: true }}
@@ -173,8 +174,8 @@ function TextoPrograma({
 }) {
   return (
     <div className={`min-w-0 ${pegadoALaDerecha ? "text-left" : "text-right"}`}>
-      <p className="font-body text-xs uppercase tracking-cinematic text-champagne/70">{hora}</p>
-      <p className="mt-1 font-display text-xl font-light leading-snug text-alabaster">
+      <p className="font-body text-xs uppercase tracking-cinematic text-olive">{hora}</p>
+      <p className="mt-1 font-display text-xl font-light leading-snug text-olive-900">
         {actividad}
       </p>
     </div>
@@ -189,15 +190,18 @@ export function Timeline() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/images/mesa-fondo-jardin-1.jpg')" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-olive/90 via-olive/85 to-cinematic-dark/90" />
+      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
+
+      {/* Particles */}
+      <ParticleField count={25} color="rgba(130,134,97,0.3)" />
 
       <div className="relative z-10">
         <Reveal className="text-center" variant="fade-up">
-          <p className="eyebrow text-champagne/70">El programa</p>
-          <h2 className="mt-4 font-display text-4xl font-light italic text-alabaster sm:text-5xl">
+          <p className="eyebrow">El programa</p>
+          <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
             Cronograma de la noche
           </h2>
-          <OliveDivider className="text-champagne/60" />
+          <OliveDivider className="text-pistachio-400" />
         </Reveal>
 
         <Reveal delay={0.2} variant="fade-up" className="relative mx-auto mt-12 max-w-lg">
@@ -219,13 +223,13 @@ export function Timeline() {
                   <SegmentoLinea
                     indice={i}
                     origen="top"
-                    degradado={i === 0 ? "bg-gradient-to-b from-transparent to-champagne/40" : undefined}
+                    degradado={i === 0 ? "bg-gradient-to-b from-transparent to-olive/40" : undefined}
                   />
                   <SegmentoLinea
                     indice={i}
                     origen="bottom"
                     degradado={
-                      esUltimo ? "bg-gradient-to-b from-champagne/40 to-transparent" : undefined
+                      esUltimo ? "bg-gradient-to-b from-olive/40 to-transparent" : undefined
                     }
                   />
 
