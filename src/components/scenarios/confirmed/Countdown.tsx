@@ -36,18 +36,18 @@ export function Countdown() {
           <OliveDivider className="text-pistachio-400" />
         </Reveal>
 
-        <Reveal delay={0.2} variant="scale-in" className="mx-auto mt-10 grid max-w-sm grid-cols-4 gap-4">
+        <Reveal delay={0.2} variant="scale-in" className="mx-auto mt-10 grid max-w-sm grid-cols-4 gap-2 sm:gap-4">
           {UNIDADES.map(({ key, label }, i) => (
             <motion.div
               key={key}
-              className="card-surface shimmer-border py-5"
+              className="card-surface shimmer-border flex flex-col items-center justify-center px-1 py-5 text-center sm:px-2"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 + i * 0.1 }}
             >
               <motion.p
-                className="font-display text-4xl font-light text-olive-900"
+                className="font-display text-3xl font-light leading-none text-olive-900 sm:text-4xl"
                 key={cuenta[key]}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -55,7 +55,7 @@ export function Countdown() {
               >
                 {String(cuenta[key]).padStart(2, "0")}
               </motion.p>
-              <p className="eyebrow mt-2 text-olive">{label}</p>
+              <p className="eyebrow mt-2 text-olive tracking-[0.22em] sm:tracking-widest2">{label}</p>
             </motion.div>
           ))}
         </Reveal>
