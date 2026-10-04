@@ -1,24 +1,13 @@
 import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
-import { MESAS_REFERENCIA } from "@/data/mesas";
 import type { Mesa } from "@/types/domain";
 
 interface TableAssignmentProps {
   mesa: Mesa | null | undefined;
-  /** Plano completo salido de la BD; en demo/no disponible se cae al croquis estático. */
-  mesas?: Mesa[];
 }
 
-interface PuntoPlano {
-  numero: number;
-  pos_x: number;
-  pos_y: number;
-}
-
-export function TableAssignment({ mesa, mesas }: TableAssignmentProps) {
-  const plano: PuntoPlano[] =
-    mesas && mesas.length > 0 ? mesas : MESAS_REFERENCIA;
+export function TableAssignment({ mesa }: TableAssignmentProps) {
   return (
     <section className="section-cinematic film-grain">
       {/* Background image */}
@@ -64,39 +53,7 @@ export function TableAssignment({ mesa, mesas }: TableAssignmentProps) {
           </Reveal>
         )}
 
-        {/* Floor plan */}
-        <Reveal delay={0.3} variant="scale-in" className="card-surface shimmer-border relative mt-10 h-80 sm:h-96">
-          <p className="eyebrow absolute left-6 top-4 text-olive">Croquis del salón</p>
 
-          <div className="absolute inset-x-0 bottom-0 top-12">
-            {plano.map((ref, i) => {
-              const esLaMia = mesa?.numero === ref.numero;
-              return (
-                <motion.div
-                  key={ref.numero}
-                  className={`absolute flex h-12 w-12 items-center justify-center rounded-full font-body text-xs transition-colors duration-500 ${
-                    esLaMia
-                      ? "bg-olive text-alabaster shadow-glow-olive ring-4 ring-pistachio-300"
-                      : "bg-pistachio-50 text-olive-600 hover:bg-pistachio-100"
-                  }`}
-                  style={{ left: `${ref.pos_x}%`, top: `${ref.pos_y}%`, x: "-50%", y: "-50%" }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileInView={{ opacity: 1, scale: esLaMia ? 1.25 : 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 + i * 0.05, type: "spring", stiffness: 200 }}
-                  whileHover={{ scale: esLaMia ? 1.3 : 1.1 }}
-                >
-                  {ref.numero}
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Decorative floor pattern */}
-          <div className="pointer-events-none absolute inset-0 rounded-[28px] opacity-30">
-            <div className="absolute inset-4 rounded-full border border-dashed border-pistachio-200" />
-          </div>
-        </Reveal>
       </div>
     </section>
   );

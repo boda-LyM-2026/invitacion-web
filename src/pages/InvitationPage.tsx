@@ -114,7 +114,7 @@ export default function InvitationPage() {
             <Countdown />
             <LocationSection />
             <Timeline />
-            <TableAssignment mesa={grupo.mesa} mesas={grupo.mesas} />
+            <TableAssignment mesa={grupo.mesa} />
             <Recommendations />
             <Footer />
           </motion.main>
