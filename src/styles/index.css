@@ -39,7 +39,11 @@
   }
 
   .section-cinematic {
-    @apply relative mx-auto w-full max-w-md px-6 py-24 sm:max-w-lg md:max-w-2xl lg:max-w-3xl;
+    @apply relative w-full py-24;
+  }
+
+  .section-content {
+    @apply mx-auto w-full max-w-md px-6 sm:max-w-lg md:max-w-2xl lg:max-w-3xl;
   }
 
   .divider-branch {

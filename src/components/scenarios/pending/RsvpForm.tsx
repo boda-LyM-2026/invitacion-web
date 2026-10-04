@@ -102,20 +102,20 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-2.jpg')" }}
+        style={{ backgroundImage: "url('/images/ramo-de-flores.jpg')" }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
-          <p className="eyebrow text-champagne/70">Confirma tu asistencia</p>
+          <p className="eyebrow text-champagne/60">Confirma tu asistencia</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-alabaster sm:text-5xl">
             {grupo.invitado_principal}, ¿nos acompañas?
           </h2>
           <OliveDivider className="text-champagne/60" />
           <p className="mt-4 font-body text-sm text-alabaster/70">
-            Tu grupo tiene {grupo.limite_personas}{" "}
-            {grupo.limite_personas === 1 ? "lugar" : "lugares"} reservados.
+            Tu grupo tiene {grupo.limite_personas} {grupo.limite_personas === 1 ? "lugar" : "lugares"}{" "}
+            reservados.
           </p>
         </Reveal>
 
@@ -127,7 +127,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
             className={`relative overflow-hidden rounded-full px-10 py-4 font-body text-sm uppercase tracking-[0.18em] transition-all duration-500 ${
               intencion === "confirmed"
                 ? "bg-alabaster text-olive shadow-glow-champagne"
-                : "bg-alabaster/10 text-alabaster border border-alabaster/30 hover:bg-alabaster/20"
+                : "border border-alabaster/30 bg-alabaster/10 text-alabaster hover:bg-alabaster/20"
             }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
@@ -147,8 +147,8 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
             onClick={() => setIntencion("declined")}
             className={`rounded-full px-10 py-4 font-body text-sm uppercase tracking-[0.18em] transition-all duration-500 ${
               intencion === "declined"
-                ? "bg-alabaster/20 text-alabaster border border-alabaster/50"
-                : "bg-transparent text-alabaster/70 border border-alabaster/20 hover:bg-alabaster/10"
+                ? "border border-alabaster/50 bg-alabaster/20 text-alabaster"
+                : "border border-alabaster/20 bg-transparent text-alabaster/70 hover:bg-alabaster/10"
             }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}

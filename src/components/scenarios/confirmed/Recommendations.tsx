@@ -70,13 +70,13 @@ export function Recommendations() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-cinematic-dark/90 via-olive/85 to-cinematic-dark/90" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
-          <p className="eyebrow text-champagne/70">Para tener en cuenta</p>
-          <h2 className="mt-4 font-display text-4xl font-light italic text-alabaster sm:text-5xl">
-            Recomendaciones
+          <p className="eyebrow">Recomendaciones para el día</p>
+          <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
+            Para disfrutarlo al máximo
           </h2>
-          <OliveDivider className="text-champagne/60" />
+          <OliveDivider className="text-pistachio-400" />
         </Reveal>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-3">

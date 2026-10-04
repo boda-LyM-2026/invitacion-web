@@ -27,7 +27,7 @@ export function Countdown() {
       {/* Particles */}
       <ParticleField count={25} color="rgba(130,134,97,0.3)" />
 
-      <div className="relative z-10 text-center">
+      <div className="section-content relative z-10 text-center">
         <Reveal variant="fade-up">
           <p className="eyebrow">Falta poco</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">

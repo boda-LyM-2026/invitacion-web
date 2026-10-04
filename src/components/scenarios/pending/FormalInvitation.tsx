@@ -13,7 +13,7 @@ export function FormalInvitation() {
       />
       <div className="absolute inset-0 bg-alabaster/90 backdrop-blur-sm" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="blur-in">
           <div className="card-surface shimmer-border mx-auto max-w-lg p-8 md:p-12">
             {/* Decorative top line */}
