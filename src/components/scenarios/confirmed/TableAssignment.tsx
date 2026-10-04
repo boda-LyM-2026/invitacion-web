@@ -65,31 +65,32 @@ export function TableAssignment({ mesa, mesas }: TableAssignmentProps) {
         )}
 
         {/* Floor plan */}
-        <Reveal delay={0.3} variant="scale-in" className="card-surface shimmer-border relative mt-10 h-72 sm:h-80">
+        <Reveal delay={0.3} variant="scale-in" className="card-surface shimmer-border relative mt-10 h-80 sm:h-96">
           <p className="eyebrow absolute left-6 top-4 text-olive">Croquis del salón</p>
 
-          {/* Animated tables */}
-          {plano.map((ref, i) => {
-            const esLaMia = mesa?.numero === ref.numero;
-            return (
-              <motion.div
-                key={ref.numero}
-                className={`absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full font-body text-xs transition-all duration-500 ${
-                  esLaMia
-                    ? "bg-olive text-alabaster shadow-glow-olive ring-4 ring-pistachio-300"
-                    : "bg-pistachio-50 text-olive-600 hover:bg-pistachio-100"
-                }`}
-                style={{ left: `${ref.pos_x}%`, top: `${ref.pos_y}%` }}
-                initial={{ opacity: 0, scale: 0 }}
-                whileInView={{ opacity: 1, scale: esLaMia ? 1.25 : 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.4 + i * 0.05, type: "spring", stiffness: 200 }}
-                whileHover={{ scale: esLaMia ? 1.3 : 1.1 }}
-              >
-                {ref.numero}
-              </motion.div>
-            );
-          })}
+          <div className="absolute inset-x-0 bottom-0 top-12">
+            {plano.map((ref, i) => {
+              const esLaMia = mesa?.numero === ref.numero;
+              return (
+                <motion.div
+                  key={ref.numero}
+                  className={`absolute flex h-12 w-12 items-center justify-center rounded-full font-body text-xs transition-colors duration-500 ${
+                    esLaMia
+                      ? "bg-olive text-alabaster shadow-glow-olive ring-4 ring-pistachio-300"
+                      : "bg-pistachio-50 text-olive-600 hover:bg-pistachio-100"
+                  }`}
+                  style={{ left: `${ref.pos_x}%`, top: `${ref.pos_y}%`, x: "-50%", y: "-50%" }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: esLaMia ? 1.25 : 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 + i * 0.05, type: "spring", stiffness: 200 }}
+                  whileHover={{ scale: esLaMia ? 1.3 : 1.1 }}
+                >
+                  {ref.numero}
+                </motion.div>
+              );
+            })}
+          </div>
 
           {/* Decorative floor pattern */}
           <div className="pointer-events-none absolute inset-0 rounded-[28px] opacity-30">
