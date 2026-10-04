@@ -17,7 +17,7 @@ export interface OcupacionMesa {
 }
 
 /**
- * RF-12b: CRUD de mesas del salón. Las mesas se usan para el croquis
+ * RF-12b: CRUD de mesas del salón. Las mesas se usan para la asignación
  * del invitado y la asignación en el panel. Protegido por las políticas
  * RLS `admin_write_mesas` (solo usuarios en admin_profiles).
  */
