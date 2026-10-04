@@ -47,8 +47,7 @@ export interface GrupoInvitacion {
   creado_en: string;
   acompanantes: Acompanante[];
   mesa?: Mesa | null;
-  /** Plano completo del salón (RPC obtener_grupo), para pintar el croquis. */
-  mesas?: Mesa[];
+
 }
 
 export interface KpiResumen {
