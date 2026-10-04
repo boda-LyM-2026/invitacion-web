@@ -1,9 +1,9 @@
 import type { Mesa } from "@/types/domain";
 
 /**
- * Croquis del salón. Mantener sincronizado con el seed de `mesas` en
+ * Mesas de referencia. Mantener sincronizado con el seed de `mesas` en
  * supabase/schema.sql (11 mesas). La asignación real de cada invitado
- * viene de la base; esta lista solo dibuja el plano.
+ * viene de la base de datos.
  */
 export const MESAS_REFERENCIA: Array<Pick<Mesa, "numero" | "pos_x" | "pos_y">> = [
   { numero: 1, pos_x: 15, pos_y: 20 },

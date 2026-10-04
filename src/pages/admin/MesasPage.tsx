@@ -42,7 +42,7 @@ export default function MesasPage() {
         <div>
           <h1 className="font-display text-3xl font-light italic text-olive-900">Mesas del salón</h1>
           <p className="mt-1 font-body text-sm text-ink-muted">
-            {mesas.length} mesas · configura nombre, capacidad y posición del croquis.
+            {mesas.length} mesas · configura nombre y capacidad de la mesa.
           </p>
         </div>
         <motion.button
