@@ -35,10 +35,9 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
       return grupo.acompanantes.map((a) => ({
         id: a.id,
         nombre_completo: a.nombre_completo ?? "",
-        es_nino: a.es_nino,
       }));
     }
-    return Array.from({ length: cuposAcompanantes }, () => ({ nombre_completo: "", es_nino: false }));
+    return Array.from({ length: cuposAcompanantes }, () => ({ nombre_completo: "" }));
   });
 
   const puedeEnviar = useMemo(() => {
@@ -186,15 +185,6 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
                     placeholder="Nombre completo"
                     className="w-full rounded-xl border border-alabaster/20 bg-alabaster/90 px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
                   />
-                  <label className="mt-3 flex items-center gap-3 font-body text-xs text-champagne/70">
-                    <input
-                      type="checkbox"
-                      checked={a.es_nino}
-                      onChange={(e) => actualizarAcompanante(i, { es_nino: e.target.checked })}
-                      className="h-4 w-4 rounded border-alabaster/30 accent-olive"
-                    />
-                    Es niño/a
-                  </label>
                 </motion.div>
               ))}
             </motion.div>

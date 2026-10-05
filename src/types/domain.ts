@@ -28,7 +28,6 @@ export interface Acompanante {
   id: string;
   grupo_id: string;
   nombre_completo: string | null;
-  es_nino: boolean;
   confirmado: boolean | null;
 }
 
@@ -78,5 +77,5 @@ export interface RSVPAttempt {
 export interface RsvpPayload {
   estado: Extract<EstadoInvitacion, "confirmed" | "declined">;
   mensaje_rsvp: string | null;
-  acompanantes: Array<{ id?: string; nombre_completo: string; es_nino: boolean }>;
+  acompanantes: Array<{ id?: string; nombre_completo: string }>;
 }

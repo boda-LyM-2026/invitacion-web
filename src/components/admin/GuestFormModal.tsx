@@ -21,16 +21,30 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
     mesa_id: grupoInicial?.mesa_id ?? grupoInicial?.mesa?.id ?? null,
     estado: grupoInicial?.estado ?? "pending",
     acompanantes: (grupoInicial?.acompanantes ?? []).map((a) => ({
+      id: a.id,
       nombre_completo: a.nombre_completo ?? "",
-      es_nino: a.es_nino,
     })),
   });
   const [guardando, setGuardando] = useState(false);
 
   const acompanantes = form.acompanantes ?? [];
+  /**
+   * Los que ya tienen id existen en base de datos: son inmutables. El titular
+   * solo puede agregar nombres nuevos, nunca reemplazar los registrados.
+   */
+  const registrados = acompanantes.filter((a) => Boolean(a.id));
+  const nuevos = acompanantes.filter((a) => !a.id);
   /** El titular cuenta como una persona: los acompanantes nunca superan el límite - 1. */
   const maxAcompanantes = Math.max(0, form.limite_personas - 1);
-  const excedeLimite = acompanantes.filter((a) => a.nombre_completo.trim()).length > maxAcompanantes;
+  const llenados = acompanantes.filter((a) => a.nombre_completo.trim()).length;
+  const excedeLimite = llenados > maxAcompanantes;
+
+  const normalizar = (s: string) => s.trim().toLowerCase();
+  const nombresRegistrados = new Set(registrados.map((a) => normalizar(a.nombre_completo)));
+  /** No se admite un nombre duplicado ni uno que ya esté en base de datos. */
+  const duplicado = nuevos.some(
+    (a) => a.nombre_completo.trim() && nombresRegistrados.has(normalizar(a.nombre_completo)),
+  );
 
   function actualizarAcompanantes(indice: number, cambios: Partial<AcompananteInput>) {
     setForm({
@@ -41,7 +55,7 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
 
   function agregarAcompanante() {
     if (acompanantes.length >= maxAcompanantes) return;
-    setForm({ ...form, acompanantes: [...acompanantes, { nombre_completo: "", es_nino: false }] });
+    setForm({ ...form, acompanantes: [...acompanantes, { nombre_completo: "" }] });
   }
 
   function quitarAcompanante(indice: number) {
@@ -52,6 +66,7 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
     setGuardando(true);
     await onGuardar({
       ...form,
+      // Solo se envían los nuevos: los registrados no se tocan (ver hook).
       acompanantes: acompanantes.filter((a) => a.nombre_completo.trim()),
     });
     setGuardando(false);
@@ -115,50 +130,58 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
                 Acompañantes
               </label>
               <span className="font-body text-xs text-ink-muted">
-                {acompanantes.filter((a) => a.nombre_completo.trim()).length} de {maxAcompanantes}
+                {llenados} de {maxAcompanantes}
               </span>
             </div>
 
             <div className="space-y-2">
+              {registrados.map((acompanante) => (
+                <div
+                  key={acompanante.id}
+                  className="flex items-center gap-2 rounded-lg border border-pistachio-200/60 bg-pistachio-50/70 px-3 py-2"
+                >
+                  <span className="min-w-0 flex-1 truncate font-body text-sm text-ink">
+                    {acompanante.nombre_completo}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-olive/10 px-2 py-0.5 font-body text-[10px] uppercase tracking-wider text-olive-900">
+                    Registrado
+                  </span>
+                </div>
+              ))}
+
               <AnimatePresence initial={false}>
-                {acompanantes.map((acompanante, indice) => (
-                  <motion.div
-                    key={indice}
-                    className="flex items-center gap-2"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <input
-                      value={acompanante.nombre_completo}
-                      onChange={(e) =>
-                        actualizarAcompanantes(indice, { nombre_completo: e.target.value })
-                      }
-                      placeholder="Nombre del acompañante"
-                      className="min-w-0 flex-1 rounded-lg border border-pistachio-200 bg-white px-3 py-2 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none"
-                    />
-                    <label className="flex shrink-0 cursor-pointer items-center gap-1.5 font-body text-xs text-ink-muted">
-                      <input
-                        type="checkbox"
-                        checked={acompanante.es_nino}
-                        onChange={(e) => actualizarAcompanantes(indice, { es_nino: e.target.checked })}
-                        className="h-4 w-4 accent-olive"
-                      />
-                      Niño
-                    </label>
-                    <motion.button
-                      type="button"
-                      onClick={() => quitarAcompanante(indice)}
-                      aria-label={`Quitar acompañante ${indice + 1}`}
-                      className="shrink-0 rounded-lg px-2 py-1.5 font-body text-sm text-ink-muted transition-colors hover:bg-pistachio-50 hover:text-olive-900"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                {nuevos.map((acompanante) => {
+                  const indice = acompanantes.indexOf(acompanante);
+                  return (
+                    <motion.div
+                      key={indice}
+                      className="flex items-center gap-2"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
                     >
-                      ×
-                    </motion.button>
-                  </motion.div>
-                ))}
+                      <input
+                        value={acompanante.nombre_completo}
+                        onChange={(e) =>
+                          actualizarAcompanantes(indice, { nombre_completo: e.target.value })
+                        }
+                        placeholder="Nombre del acompañante"
+                        className="min-w-0 flex-1 rounded-lg border border-pistachio-200 bg-white px-3 py-2 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none"
+                      />
+                      <motion.button
+                        type="button"
+                        onClick={() => quitarAcompanante(indice)}
+                        aria-label={`Quitar acompañante ${acompanante.nombre_completo || "nuevo"}`}
+                        className="shrink-0 rounded-lg px-2 py-1.5 font-body text-sm text-ink-muted transition-colors hover:bg-pistachio-50 hover:text-olive-900"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        ×
+                      </motion.button>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
 
               {acompanantes.length === 0 && (
@@ -167,6 +190,12 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
                 </p>
               )}
             </div>
+
+            {registrados.length > 0 && (
+              <p className="mt-3 font-body text-xs text-ink-muted">
+                Los registrados no se pueden modificar ni eliminar. Solo puedes añadir los que falten.
+              </p>
+            )}
 
             <button
               type="button"
@@ -179,7 +208,12 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
 
             {excedeLimite && (
               <p className="mt-2 font-body text-xs text-red-700">
-                Hay más acompanantes que personas permitidas. Sube el límite o quitasome.
+                Hay más acompanantes que personas permitidas. Sube el límite o quita alguno.
+              </p>
+            )}
+            {duplicado && (
+              <p className="mt-2 font-body text-xs text-red-700">
+                Ese nombre ya está registrado como acompañante.
               </p>
             )}
           </div>
@@ -266,7 +300,7 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
           <motion.button
             onClick={handleSubmit}
             disabled={
-              guardando || !form.nombre_grupo || !form.invitado_principal || excedeLimite
+              guardando || !form.nombre_grupo || !form.invitado_principal || excedeLimite || duplicado
             }
             className="rounded-xl bg-olive px-5 py-2.5 font-body text-sm text-alabaster shadow-soft transition-all hover:bg-olive-500 disabled:opacity-50"
             whileHover={{ scale: 1.02 }}

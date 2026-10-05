@@ -10,7 +10,11 @@ import type {
 
 export interface AcompananteInput {
   nombre_completo: string;
-  es_nino: boolean;
+  /**
+   * Id del acompañante ya registrado en base de datos. Si viene informado, el
+   * registro es inmutable: se muestra tal cual y no se puede reemplazar.
+   */
+  id?: string;
 }
 
 export interface NuevoGrupoInput {
@@ -33,9 +37,16 @@ export type FilaImportacion = Pick<
   acompanantes?: AcompananteInput[];
 };
 
+/**
+ * Normaliza la lista: recorta, descarta vacíos y separa los que ya existen en
+ * base de datos (id informado) de los nuevos que se deben insertar.
+ */
 function limpiarAcompanantes(lista: AcompananteInput[] | undefined): AcompananteInput[] {
   return (lista ?? [])
-    .map((a) => ({ nombre_completo: a.nombre_completo.trim().slice(0, 120), es_nino: a.es_nino }))
+    .map((a) => ({
+      nombre_completo: a.nombre_completo.trim().slice(0, 120),
+      ...(a.id ? { id: a.id } : {}),
+    }))
     .filter((a) => a.nombre_completo.length > 0);
 }
 
@@ -70,26 +81,20 @@ export function useGuestsAdmin() {
   }, [cargar]);
 
   /**
-   * Sincroniza los acompanantes del grupo: borra los previos e inserta los
-   * indicados (mismo criterio que la RPC submit_rsvp). Los nombres vacíos se
-   * descartan para no crear filas basura.
+   * Inserta unicamente los acompanantes que aun no existen en base de datos.
+   * Los que ya tienen id no se tocan: quedan bloqueados y solo se pueden
+   * agregar nombres nuevos, nunca reemplazar los existentes.
    */
-  async function sincronizarAcompanantes(
+  async function agregarAcompanantes(
     grupoId: string,
     lista: AcompananteInput[] | undefined,
   ): Promise<string | null> {
-    const limpios = limpiarAcompanantes(lista);
-    const { error: errorBorrado } = await supabase
-      .from("acompanantes")
-      .delete()
-      .eq("grupo_id", grupoId);
-    if (errorBorrado) return "No se pudieron actualizar los acompanantes.";
-    if (limpios.length === 0) return null;
+    const nuevos = limpiarAcompanantes(lista).filter((a) => !a.id);
+    if (nuevos.length === 0) return null;
     const { error } = await supabase.from("acompanantes").insert(
-      limpios.map((a) => ({
+      nuevos.map((a) => ({
         grupo_id: grupoId,
         nombre_completo: a.nombre_completo,
-        es_nino: a.es_nino,
         confirmado: null,
       })),
     );
@@ -114,7 +119,6 @@ export function useGuestsAdmin() {
             id: crypto.randomUUID(),
             grupo_id: id,
             nombre_completo: a.nombre_completo,
-            es_nino: a.es_nino,
             confirmado: null,
           })),
           mesa: null,
@@ -129,7 +133,7 @@ export function useGuestsAdmin() {
       .select("id")
       .single();
     if (error) return "No se pudo crear el grupo.";
-    const errAcompanantes = await sincronizarAcompanantes(data.id, acompanantes);
+    const errAcompanantes = await agregarAcompanantes(data.id, acompanantes);
     await cargar();
     return errAcompanantes;
   }
@@ -150,7 +154,6 @@ export function useGuestsAdmin() {
                   id: crypto.randomUUID(),
                   grupo_id: g.id,
                   nombre_completo: a.nombre_completo,
-                  es_nino: a.es_nino,
                   confirmado: null,
                 }))
               : g.acompanantes,
@@ -163,7 +166,7 @@ export function useGuestsAdmin() {
       const { error } = await supabase.from("grupos_invitacion").update(resto).eq("id", id);
       if (error) return "No se pudo actualizar el grupo.";
     }
-    const errAcompanantes = await sincronizarAcompanantes(id, acompanantes);
+    const errAcompanantes = await agregarAcompanantes(id, acompanantes);
     await cargar();
     return errAcompanantes;
   }
@@ -214,7 +217,6 @@ export function useGuestsAdmin() {
       return limpiarAcompanantes(fila.acompanantes).map((a) => ({
         grupo_id: grupoId,
         nombre_completo: a.nombre_completo,
-        es_nino: a.es_nino,
         confirmado: null,
       }));
     });

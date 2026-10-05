@@ -42,20 +42,19 @@ function texto(valor: unknown): string {
 
 /**
  * Interpreta la celda de acompañantes. Acepta una lista JSON
- * (["Ana","Luis"] o [{"nombre":"Ana","es_nino":true}]) o texto plano
- * separado por ";" o ",".
+ * (["Ana","Luis"] o [{"nombre":"Ana"}]) o texto plano separado por ";" o ",".
  */
 function leerAcompanantes(valor: unknown): AcompananteInput[] {
   if (valor == null) return [];
   if (Array.isArray(valor)) {
     return valor.flatMap((item) => {
       if (typeof item === "string") {
-        return [{ nombre_completo: item.trim(), es_nino: false }];
+        return [{ nombre_completo: item.trim() }];
       }
       if (item && typeof item === "object") {
         const o = item as Record<string, unknown>;
         const nombre = texto(o.nombre_completo ?? o.nombre ?? o.name);
-        return nombre ? [{ nombre_completo: nombre, es_nino: Boolean(o.es_nino) }] : [];
+        return nombre ? [{ nombre_completo: nombre }] : [];
       }
       return [];
     });
@@ -73,7 +72,7 @@ function leerAcompanantes(valor: unknown): AcompananteInput[] {
     .split(/[;,]/)
     .map((n) => n.trim())
     .filter(Boolean)
-    .map((nombre_completo) => ({ nombre_completo, es_nino: false }));
+    .map((nombre_completo) => ({ nombre_completo }));
 }
 
 function leerFila(raw: FilaRaw): FilaImportacion | null {
@@ -243,7 +242,7 @@ export function ImportGuestsModal({ onImportar, onCerrar }: ImportGuestsModalPro
           <pre className="mt-2 overflow-x-auto rounded-lg bg-white px-3 py-2 font-body text-xs text-ink">
 {`[
   { "nombre_grupo": "Familia Rojas", "invitado_principal": "Camila Rojas", "limite_personas": 3, "categoria": "familia_novia", "importancia": "principal",
-    "acompanantes": [{ "nombre": "Mateo Rojas" }, { "nombre": "Sofia Rojas", "es_nino": true }] },
+    "acompanantes": [{ "nombre": "Mateo Rojas" }, { "nombre": "Sofia Rojas" }] },
   { "nombre_grupo": "Familia Herrera", "invitado_principal": "Daniel Herrera" }
 ]`}
           </pre>
@@ -254,8 +253,8 @@ export function ImportGuestsModal({ onImportar, onCerrar }: ImportGuestsModalPro
           <p className="mt-2 font-body text-xs text-ink-muted">
             En <code className="text-olive-700">acompanantes</code> puedes escribir los nombres
             separados por <strong>;</strong> (ej. <code className="text-olive-700">Mateo; Sofia</code>)
-            o un arreglo JSON si necesitas marcar niños. Si no indicas límite, se calcula como
-            titular + acompañantes.
+            o un arreglo JSON. Todos los invitados son mayores de edad. Si no indicas límite, se
+            calcula como titular + acompañantes.
           </p>
         </div>
 
@@ -302,9 +301,7 @@ export function ImportGuestsModal({ onImportar, onCerrar }: ImportGuestsModalPro
                       <td className="px-3 py-2">{f.categoria.replace("_", " ")}</td>
                       <td className="px-3 py-2">
                         {f.acompanantes && f.acompanantes.length > 0
-                          ? f.acompanantes
-                              .map((a) => a.nombre_completo + (a.es_nino ? " (niño)" : ""))
-                              .join(", ")
+                          ? f.acompanantes.map((a) => a.nombre_completo).join(", ")
                           : "—"}
                       </td>
                     </tr>
