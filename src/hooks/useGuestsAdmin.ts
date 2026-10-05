@@ -37,6 +37,11 @@ export type FilaImportacion = Pick<
   acompanantes?: AcompananteInput[];
 };
 
+/** Clave de comparación de nombres: sin espacios extremos, sin distinguir mayúsculas. */
+function claveNombre(nombre: string): string {
+  return nombre.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 /**
  * Normaliza la lista: recorta, descarta vacíos y separa los que ya existen en
  * base de datos (id informado) de los nuevos que se deben insertar.
@@ -48,6 +53,30 @@ function limpiarAcompanantes(lista: AcompananteInput[] | undefined): Acompanante
       ...(a.id ? { id: a.id } : {}),
     }))
     .filter((a) => a.nombre_completo.length > 0);
+}
+
+/**
+ * Descarta nombres repetidos: tanto dentro de la propia lista como contra un
+ * conjunto de nombres ya registrados (BD o filas anteriores del mismo lote).
+ * Un nombre que ya existe no se vuelve a escribir.
+ */
+function deduplicarAcompanantes(
+  lista: AcompananteInput[],
+  yaExistentes: Set<string>,
+): { lista: AcompananteInput[]; omitidos: number } {
+  const vistos = new Set<string>();
+  const resultado: AcompananteInput[] = [];
+  let omitidos = 0;
+  for (const a of lista) {
+    const clave = claveNombre(a.nombre_completo);
+    if (yaExistentes.has(clave) || vistos.has(clave)) {
+      omitidos++;
+      continue;
+    }
+    vistos.add(clave);
+    resultado.push(a);
+  }
+  return { lista: resultado, omitidos };
 }
 
 /**
@@ -182,12 +211,14 @@ export function useGuestsAdmin() {
   }
 
   /** Alta masiva (importación CSV/Excel): crea tantos grupos como filas. */
-  async function crearLote(filas: FilaImportacion[]): Promise<{ ok: number; error: string | null }> {
+  async function crearLote(
+    filas: FilaImportacion[],
+  ): Promise<{ ok: number; error: string | null; omitidos: number }> {
     if (!isSupabaseConfigured) {
       for (const fila of filas) {
         await crear({ ...fila, mesa_id: null, estado: "pending" });
       }
-      return { ok: filas.length, error: null };
+      return { ok: filas.length, error: null, omitidos: 0 };
     }
 
     // access_token es único por fila y lo generamos nosotros: sirve de ancla
@@ -208,13 +239,31 @@ export function useGuestsAdmin() {
       .from("grupos_invitacion")
       .insert(registros)
       .select("id, access_token");
-    if (error) return { ok: 0, error: "No se pudieron crear los grupos." };
+    if (error) return { ok: 0, error: "No se pudieron crear los grupos.", omitidos: 0 };
 
     const idPorToken = new Map((data ?? []).map((r) => [r.access_token, r.id]));
+
+    // Nombres ya registrados en la BD: un acompañante existente no se reescribe.
+    const { data: existentes } = await supabase.from("acompanantes").select("nombre_completo");
+    const yaRegistrados = new Set(
+      (existentes ?? [])
+        .map((a) => claveNombre(a.nombre_completo ?? ""))
+        .filter((n) => n.length > 0),
+    );
+
+    let omitidos = 0;
     const acompanantesPlano = filas.flatMap((fila, i) => {
       const grupoId = idPorToken.get(tokens[i]);
       if (!grupoId) return [];
-      return limpiarAcompanantes(fila.acompanantes).map((a) => ({
+      // Deduplica contra la BD y contra las filas ya procesadas del mismo lote,
+      // de modo que la misma persona no se duplique al reimportar un archivo.
+      const { lista, omitidos: descartados } = deduplicarAcompanantes(
+        limpiarAcompanantes(fila.acompanantes),
+        yaRegistrados,
+      );
+      omitidos += descartados;
+      for (const a of lista) yaRegistrados.add(claveNombre(a.nombre_completo));
+      return lista.map((a) => ({
         grupo_id: grupoId,
         nombre_completo: a.nombre_completo,
         confirmado: null,
@@ -228,7 +277,9 @@ export function useGuestsAdmin() {
     }
 
     await cargar();
-    return { ok: filas.length, error: errorAcompanantes };
+    // `omitidos` va aparte de `error`: la importación fue correcta, solo se
+    // saltaron nombres repetidos. Mezclarlos cerraría el modal como si fallara.
+    return { ok: filas.length, error: errorAcompanantes, omitidos };
   }
 
   return { grupos, loading, crear, actualizar, eliminar, crearLote, refetch: cargar };

@@ -47,32 +47,50 @@ function texto(valor: unknown): string {
 function leerAcompanantes(valor: unknown): AcompananteInput[] {
   if (valor == null) return [];
   if (Array.isArray(valor)) {
-    return valor.flatMap((item) => {
-      if (typeof item === "string") {
-        return [{ nombre_completo: item.trim() }];
-      }
-      if (item && typeof item === "object") {
-        const o = item as Record<string, unknown>;
-        const nombre = texto(o.nombre_completo ?? o.nombre ?? o.name);
-        return nombre ? [{ nombre_completo: nombre }] : [];
-      }
-      return [];
-    });
+    return sinRepetidos(
+      valor.flatMap((item) => {
+        if (typeof item === "string") {
+          return [{ nombre_completo: item.trim() }];
+        }
+        if (item && typeof item === "object") {
+          const o = item as Record<string, unknown>;
+          const nombre = texto(o.nombre_completo ?? o.nombre ?? o.name);
+          return nombre ? [{ nombre_completo: nombre }] : [];
+        }
+        return [];
+      }),
+    );
   }
   const bruto = texto(valor);
   if (!bruto) return [];
   if (bruto.startsWith("[")) {
     try {
-      return leerAcompanantes(JSON.parse(bruto));
+      return sinRepetidos(leerAcompanantes(JSON.parse(bruto)));
     } catch {
       return [];
     }
   }
-  return bruto
-    .split(/[;,]/)
-    .map((n) => n.trim())
-    .filter(Boolean)
-    .map((nombre_completo) => ({ nombre_completo }));
+  return sinRepetidos(
+    bruto
+      .split(/[;,]/)
+      .map((n) => n.trim())
+      .filter(Boolean)
+      .map((nombre_completo) => ({ nombre_completo })),
+  );
+}
+
+/**
+ * Un nombre repetido dentro de la misma fila se descarta: sin mayúsculas ni
+ * espacios de más. "Mateo;  mateo" es una sola persona, no dos.
+ */
+function sinRepetidos(lista: AcompananteInput[]): AcompananteInput[] {
+  const vistas = new Set<string>();
+  return lista.filter((a) => {
+    const clave = a.nombre_completo.trim().replace(/\s+/g, " ").toLowerCase();
+    if (!clave || vistas.has(clave)) return false;
+    vistas.add(clave);
+    return true;
+  });
 }
 
 function leerFila(raw: FilaRaw): FilaImportacion | null {
@@ -99,7 +117,8 @@ function leerFila(raw: FilaRaw): FilaImportacion | null {
   const limite = Number.parseInt(get("limite_personas"), 10);
   const categoriaRaw = get("categoria").toLowerCase().replace(" ", "_");
   const importanciaRaw = get("importancia").toLowerCase();
-  const acompanantes = leerAcompanantes(getValor("acompanantes")).filter((a) => a.nombre_completo);
+  // leerAcompanantes ya deduplica, así que el recuento es el real.
+  const acompanantes = leerAcompanantes(getValor("acompanantes"));
   const limiteLeido = Number.isFinite(limite) && limite >= 1 ? limite : 1;
 
   return {
@@ -254,7 +273,8 @@ export function ImportGuestsModal({ onImportar, onCerrar }: ImportGuestsModalPro
             En <code className="text-olive-700">acompanantes</code> puedes escribir los nombres
             separados por <strong>;</strong> (ej. <code className="text-olive-700">Mateo; Sofia</code>)
             o un arreglo JSON. Todos los invitados son mayores de edad. Si no indicas límite, se
-            calcula como titular + acompañantes.
+            calcula como titular + acompañantes. Si algún nombre ya está registrado como
+            acompañante, se omite y se te avisa al final.
           </p>
         </div>
 
