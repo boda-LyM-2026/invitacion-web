@@ -71,7 +71,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
         className="absolute inset-0 bg-fixed bg-cover bg-center"
         style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/80" />
+      <div className="absolute inset-0 bg-alabaster/30" />
         <motion.div
           className="section-content relative z-10 flex min-h-[50vh] flex-col items-center justify-center text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -104,7 +104,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
           className="absolute inset-0 bg-fixed bg-cover bg-center"
           style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
         />
-        <div className="absolute inset-0 bg-alabaster/80" />
+        <div className="absolute inset-0 bg-alabaster/30" />
 
       <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
@@ -171,7 +171,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
               {acompanantes.map((a, i) => (
                 <motion.div
                   key={a.id ?? i}
-                  className="rounded-2xl border border-pistachio-200/50 bg-white/80 p-5 shadow-soft backdrop-blur-sm"
+                  className="rounded-2xl border border-pistachio-200/50 bg-white/90 p-5 shadow-soft"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}

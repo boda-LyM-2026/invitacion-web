@@ -68,7 +68,7 @@ export function Recommendations() {
         className="absolute inset-0 bg-fixed bg-cover bg-center"
         style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/80" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
       <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
