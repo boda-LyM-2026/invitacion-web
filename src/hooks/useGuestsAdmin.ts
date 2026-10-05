@@ -252,6 +252,7 @@ export function useGuestsAdmin() {
     );
 
     let omitidos = 0;
+    const limiteReal = new Map<string, number>();
     const acompanantesPlano = filas.flatMap((fila, i) => {
       const grupoId = idPorToken.get(tokens[i]);
       if (!grupoId) return [];
@@ -263,12 +264,32 @@ export function useGuestsAdmin() {
       );
       omitidos += descartados;
       for (const a of lista) yaRegistrados.add(claveNombre(a.nombre_completo));
+      limiteReal.set(grupoId, lista.length);
       return lista.map((a) => ({
         grupo_id: grupoId,
         nombre_completo: a.nombre_completo,
         confirmado: null,
       }));
     });
+
+    // El archivo declara un límite, pero si algún acompañante se descartó por
+    // repetido el cupo real es menor. Ajustamos a la baja para no dejar plazas
+    // de sobra: titular más los acompañantes que efectivamente se insertaron.
+    const ajustes = filas.flatMap((fila, i) => {
+      const grupoId = idPorToken.get(tokens[i]);
+      if (!grupoId) return [];
+      const insertados = limiteReal.get(grupoId) ?? 0;
+      const real = insertados + 1;
+      if (fila.limite_personas === real) return [];
+      return [{ id: grupoId, limite_personas: real }];
+    });
+    if (ajustes.length > 0) {
+      await Promise.all(
+        ajustes.map((a) =>
+          supabase.from("grupos_invitacion").update({ limite_personas: a.limite_personas }).eq("id", a.id),
+        ),
+      );
+    }
 
     let errorAcompanantes: string | null = null;
     if (acompanantesPlano.length > 0) {
