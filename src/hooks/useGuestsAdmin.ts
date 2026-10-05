@@ -8,6 +8,11 @@ import type {
   NivelImportancia,
 } from "@/types/domain";
 
+export interface AcompananteInput {
+  nombre_completo: string;
+  es_nino: boolean;
+}
+
 export interface NuevoGrupoInput {
   nombre_grupo: string;
   invitado_principal: string;
@@ -16,12 +21,23 @@ export interface NuevoGrupoInput {
   importancia: NivelImportancia;
   mesa_id: string | null;
   estado: EstadoInvitacion;
+  /** Miembros de la familia que acompañan al titular (RF-07). */
+  acompanantes?: AcompananteInput[];
 }
 
 export type FilaImportacion = Pick<
   NuevoGrupoInput,
   "nombre_grupo" | "invitado_principal" | "limite_personas" | "categoria" | "importancia"
->;
+> & {
+  /** Acompañantes opcionales declarados en la fila (RF-07). */
+  acompanantes?: AcompananteInput[];
+};
+
+function limpiarAcompanantes(lista: AcompananteInput[] | undefined): AcompananteInput[] {
+  return (lista ?? [])
+    .map((a) => ({ nombre_completo: a.nombre_completo.trim().slice(0, 120), es_nino: a.es_nino }))
+    .filter((a) => a.nombre_completo.length > 0);
+}
 
 /**
  * RF-12: CRUD completo de invitados desde el panel administrativo.
@@ -53,42 +69,103 @@ export function useGuestsAdmin() {
     void cargar();
   }, [cargar]);
 
+  /**
+   * Sincroniza los acompanantes del grupo: borra los previos e inserta los
+   * indicados (mismo criterio que la RPC submit_rsvp). Los nombres vacíos se
+   * descartan para no crear filas basura.
+   */
+  async function sincronizarAcompanantes(
+    grupoId: string,
+    lista: AcompananteInput[] | undefined,
+  ): Promise<string | null> {
+    const limpios = limpiarAcompanantes(lista);
+    const { error: errorBorrado } = await supabase
+      .from("acompanantes")
+      .delete()
+      .eq("grupo_id", grupoId);
+    if (errorBorrado) return "No se pudieron actualizar los acompanantes.";
+    if (limpios.length === 0) return null;
+    const { error } = await supabase.from("acompanantes").insert(
+      limpios.map((a) => ({
+        grupo_id: grupoId,
+        nombre_completo: a.nombre_completo,
+        es_nino: a.es_nino,
+        confirmado: null,
+      })),
+    );
+    return error ? "No se pudieron guardar los acompanantes." : null;
+  }
+
   async function crear(input: NuevoGrupoInput): Promise<string | null> {
+    // acompanantes no es una columna: se separa para insertarlo en su tabla.
+    const { acompanantes, ...columnas } = input;
     if (!isSupabaseConfigured) {
+      const id = crypto.randomUUID();
       setGrupos((prev) => [
         {
-          id: crypto.randomUUID(),
+          id,
           access_token: crypto.randomUUID(),
-          ...input,
-          estado: input.estado ?? "pending",
+          ...columnas,
+          estado: columnas.estado ?? "pending",
           mensaje_rsvp: null,
           respondido_en: null,
           creado_en: new Date().toISOString(),
-          acompanantes: [],
+          acompanantes: limpiarAcompanantes(acompanantes).map((a) => ({
+            id: crypto.randomUUID(),
+            grupo_id: id,
+            nombre_completo: a.nombre_completo,
+            es_nino: a.es_nino,
+            confirmado: null,
+          })),
           mesa: null,
         },
         ...prev,
       ]);
       return null;
     }
-    const { error } = await supabase.from("grupos_invitacion").insert({
-      ...input,
-      access_token: crypto.randomUUID(),
-    });
-    if (!error) await cargar();
-    return error ? "No se pudo crear el grupo." : null;
+    const { data, error } = await supabase
+      .from("grupos_invitacion")
+      .insert({ ...columnas, access_token: crypto.randomUUID() })
+      .select("id")
+      .single();
+    if (error) return "No se pudo crear el grupo.";
+    const errAcompanantes = await sincronizarAcompanantes(data.id, acompanantes);
+    await cargar();
+    return errAcompanantes;
   }
 
   async function actualizar(id: string, cambios: Partial<NuevoGrupoInput>): Promise<string | null> {
+    const { acompanantes, ...resto } = cambios;
     if (!isSupabaseConfigured) {
       setGrupos((prev) =>
-        prev.map((g) => (g.id === id ? { ...g, ...cambios, estado: cambios.estado ?? g.estado } : g)),
+        prev.map((g) => {
+          if (g.id !== id) return g;
+          const limpios = limpiarAcompanantes(acompanantes);
+          return {
+            ...g,
+            ...resto,
+            estado: cambios.estado ?? g.estado,
+            acompanantes: acompanantes
+              ? limpios.map((a) => ({
+                  id: crypto.randomUUID(),
+                  grupo_id: g.id,
+                  nombre_completo: a.nombre_completo,
+                  es_nino: a.es_nino,
+                  confirmado: null,
+                }))
+              : g.acompanantes,
+          };
+        }),
       );
       return null;
     }
-    const { error } = await supabase.from("grupos_invitacion").update(cambios).eq("id", id);
-    if (!error) await cargar();
-    return error ? "No se pudo actualizar el grupo." : null;
+    if (Object.keys(resto).length > 0) {
+      const { error } = await supabase.from("grupos_invitacion").update(resto).eq("id", id);
+      if (error) return "No se pudo actualizar el grupo.";
+    }
+    const errAcompanantes = await sincronizarAcompanantes(id, acompanantes);
+    await cargar();
+    return errAcompanantes;
   }
 
   async function eliminar(id: string): Promise<string | null> {
@@ -110,16 +187,46 @@ export function useGuestsAdmin() {
       return { ok: filas.length, error: null };
     }
 
-    const registros = filas.map((fila) => ({
-      ...fila,
-      access_token: crypto.randomUUID(),
-      estado: "pending" as EstadoInvitacion,
+    // access_token es único por fila y lo generamos nosotros: sirve de ancla
+    // para emparejar cada grupo creado con sus acompañantes.
+    const tokens = filas.map(() => crypto.randomUUID());
+    const registros = filas.map((fila, i) => ({
+      nombre_grupo: fila.nombre_grupo,
+      invitado_principal: fila.invitado_principal,
+      limite_personas: fila.limite_personas,
+      categoria: fila.categoria,
+      importancia: fila.importancia,
       mesa_id: null,
+      estado: "pending" as EstadoInvitacion,
+      access_token: tokens[i],
     }));
 
-    const { error } = await supabase.from("grupos_invitacion").insert(registros);
-    if (!error) await cargar();
-    return { ok: error ? 0 : filas.length, error: error ? "No se pudieron crear los grupos." : null };
+    const { data, error } = await supabase
+      .from("grupos_invitacion")
+      .insert(registros)
+      .select("id, access_token");
+    if (error) return { ok: 0, error: "No se pudieron crear los grupos." };
+
+    const idPorToken = new Map((data ?? []).map((r) => [r.access_token, r.id]));
+    const acompanantesPlano = filas.flatMap((fila, i) => {
+      const grupoId = idPorToken.get(tokens[i]);
+      if (!grupoId) return [];
+      return limpiarAcompanantes(fila.acompanantes).map((a) => ({
+        grupo_id: grupoId,
+        nombre_completo: a.nombre_completo,
+        es_nino: a.es_nino,
+        confirmado: null,
+      }));
+    });
+
+    let errorAcompanantes: string | null = null;
+    if (acompanantesPlano.length > 0) {
+      const { error: err } = await supabase.from("acompanantes").insert(acompanantesPlano);
+      if (err) errorAcompanantes = "Los grupos se crearon, pero fallaron los acompañantes.";
+    }
+
+    await cargar();
+    return { ok: filas.length, error: errorAcompanantes };
   }
 
   return { grupos, loading, crear, actualizar, eliminar, crearLote, refetch: cargar };

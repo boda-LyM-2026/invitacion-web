@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CATEGORIAS, IMPORTANCIAS } from "@/config/catalogos";
-import type { FilaImportacion } from "@/hooks/useGuestsAdmin";
+import type { AcompananteInput, FilaImportacion } from "@/hooks/useGuestsAdmin";
 import type { CategoriaInvitado, NivelImportancia } from "@/types/domain";
 
 interface ImportGuestsModalProps {
@@ -11,33 +11,86 @@ interface ImportGuestsModalProps {
 
 type FilaRaw = Record<string, unknown>;
 
-const ALIASES: Record<keyof FilaImportacion, string[]> = {
+const ALIASES: Record<string, string[]> = {
   nombre_grupo: ["nombre_grupo", "grupo", "nombre del grupo"],
   invitado_principal: ["invitado_principal", "invitado", "principal"],
   limite_personas: ["limite_personas", "limite", "límite", "personas", "cupo"],
   categoria: ["categoria", "categoría", "cat"],
   importancia: ["importancia", "imp"],
+  acompanantes: [
+    "acompanantes",
+    "acompañantes",
+    "acompanantes_nombres",
+    "familia",
+    "integrantes",
+    "miembros",
+  ],
 };
 
-const COLUMNAS: Array<[keyof FilaImportacion, string]> = [
+const COLUMNAS: Array<[string, string]> = [
   ["nombre_grupo", "Nombre del grupo (obligatorio)"],
   ["invitado_principal", "Invitado principal (obligatorio)"],
   ["limite_personas", "Límite de personas (default 1)"],
   ["categoria", "Categoría (default otros)"],
   ["importancia", "Importancia (default estandar)"],
+  ["acompanantes", "Acompañantes (opcional) — separados por ; o ,"],
 ];
 
 function texto(valor: unknown): string {
   return String(valor ?? "").trim();
 }
 
+/**
+ * Interpreta la celda de acompañantes. Acepta una lista JSON
+ * (["Ana","Luis"] o [{"nombre":"Ana","es_nino":true}]) o texto plano
+ * separado por ";" o ",".
+ */
+function leerAcompanantes(valor: unknown): AcompananteInput[] {
+  if (valor == null) return [];
+  if (Array.isArray(valor)) {
+    return valor.flatMap((item) => {
+      if (typeof item === "string") {
+        return [{ nombre_completo: item.trim(), es_nino: false }];
+      }
+      if (item && typeof item === "object") {
+        const o = item as Record<string, unknown>;
+        const nombre = texto(o.nombre_completo ?? o.nombre ?? o.name);
+        return nombre ? [{ nombre_completo: nombre, es_nino: Boolean(o.es_nino) }] : [];
+      }
+      return [];
+    });
+  }
+  const bruto = texto(valor);
+  if (!bruto) return [];
+  if (bruto.startsWith("[")) {
+    try {
+      return leerAcompanantes(JSON.parse(bruto));
+    } catch {
+      return [];
+    }
+  }
+  return bruto
+    .split(/[;,]/)
+    .map((n) => n.trim())
+    .filter(Boolean)
+    .map((nombre_completo) => ({ nombre_completo, es_nino: false }));
+}
+
 function leerFila(raw: FilaRaw): FilaImportacion | null {
-  const get = (clave: keyof FilaImportacion): string => {
+  const buscar = (clave: string): string | undefined => {
     for (const alias of ALIASES[clave]) {
       const encontrado = Object.keys(raw).find((k) => k.trim().toLowerCase() === alias.toLowerCase());
-      if (encontrado !== undefined) return texto(raw[encontrado]);
+      if (encontrado !== undefined) return encontrado;
     }
-    return "";
+    return undefined;
+  };
+  const get = (clave: string): string => {
+    const encontrado = buscar(clave);
+    return encontrado === undefined ? "" : texto(raw[encontrado]);
+  };
+  const getValor = (clave: string): unknown => {
+    const encontrado = buscar(clave);
+    return encontrado === undefined ? undefined : raw[encontrado];
   };
 
   const nombre_grupo = get("nombre_grupo");
@@ -47,17 +100,21 @@ function leerFila(raw: FilaRaw): FilaImportacion | null {
   const limite = Number.parseInt(get("limite_personas"), 10);
   const categoriaRaw = get("categoria").toLowerCase().replace(" ", "_");
   const importanciaRaw = get("importancia").toLowerCase();
+  const acompanantes = leerAcompanantes(getValor("acompanantes")).filter((a) => a.nombre_completo);
+  const limiteLeido = Number.isFinite(limite) && limite >= 1 ? limite : 1;
 
   return {
     nombre_grupo,
     invitado_principal,
-    limite_personas: Number.isFinite(limite) && limite >= 1 ? limite : 1,
+    // Nunca por debajo de titular + acompañantes: si no, la familia no cabe.
+    limite_personas: Math.max(limiteLeido, acompanantes.length + 1),
     categoria: (CATEGORIAS as string[]).includes(categoriaRaw)
       ? (categoriaRaw as CategoriaInvitado)
       : "otros",
     importancia: (IMPORTANCIAS as string[]).includes(importanciaRaw)
       ? (importanciaRaw as NivelImportancia)
       : "estandar",
+    acompanantes,
   };
 }
 
@@ -66,8 +123,22 @@ function construirFilas(raw: FilaRaw[]): FilaImportacion[] {
 }
 
 function descargarPlantilla() {
-  const encabezado = ["nombre_grupo", "invitado_principal", "limite_personas", "categoria", "importancia"];
-  const ejemplo = ["Familia Ejemplo", "Camila Rojas", "3", "familia_novia", "principal"];
+  const encabezado = [
+    "nombre_grupo",
+    "invitado_principal",
+    "limite_personas",
+    "categoria",
+    "importancia",
+    "acompanantes",
+  ];
+  const ejemplo = [
+    "Familia Ejemplo",
+    "Camila Rojas",
+    "3",
+    "familia_novia",
+    "principal",
+    "Mateo Rojas; Sofia Rojas",
+  ];
   const csv = "\ufeff" + encabezado.join(",") + "\n" + ejemplo.join(",");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -171,13 +242,20 @@ export function ImportGuestsModal({ onImportar, onCerrar }: ImportGuestsModalPro
           </h3>
           <pre className="mt-2 overflow-x-auto rounded-lg bg-white px-3 py-2 font-body text-xs text-ink">
 {`[
-  { "nombre_grupo": "Familia Rojas", "invitado_principal": "Camila Rojas", "limite_personas": 3, "categoria": "familia_novia", "importancia": "principal" },
+  { "nombre_grupo": "Familia Rojas", "invitado_principal": "Camila Rojas", "limite_personas": 3, "categoria": "familia_novia", "importancia": "principal",
+    "acompanantes": [{ "nombre": "Mateo Rojas" }, { "nombre": "Sofia Rojas", "es_nino": true }] },
   { "nombre_grupo": "Familia Herrera", "invitado_principal": "Daniel Herrera" }
 ]`}
           </pre>
           <p className="mt-2 font-body text-xs text-ink-muted">
             Categorías: familia_novia · familia_novio · amigos_novia · amigos_novio · trabajo ·
             otros. Importancia: principal · estandar · cortesia.
+          </p>
+          <p className="mt-2 font-body text-xs text-ink-muted">
+            En <code className="text-olive-700">acompanantes</code> puedes escribir los nombres
+            separados por <strong>;</strong> (ej. <code className="text-olive-700">Mateo; Sofia</code>)
+            o un arreglo JSON si necesitas marcar niños. Si no indicas límite, se calcula como
+            titular + acompañantes.
           </p>
         </div>
 
@@ -212,6 +290,7 @@ export function ImportGuestsModal({ onImportar, onCerrar }: ImportGuestsModalPro
                     <th className="px-3 py-2">Principal</th>
                     <th className="px-3 py-2">Límite</th>
                     <th className="px-3 py-2">Categoría</th>
+                    <th className="px-3 py-2">Acompañantes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-pistachio-100 font-body text-ink-light">
@@ -221,6 +300,13 @@ export function ImportGuestsModal({ onImportar, onCerrar }: ImportGuestsModalPro
                       <td className="px-3 py-2">{f.invitado_principal}</td>
                       <td className="px-3 py-2">{f.limite_personas}</td>
                       <td className="px-3 py-2">{f.categoria.replace("_", " ")}</td>
+                      <td className="px-3 py-2">
+                        {f.acompanantes && f.acompanantes.length > 0
+                          ? f.acompanantes
+                              .map((a) => a.nombre_completo + (a.es_nino ? " (niño)" : ""))
+                              .join(", ")
+                          : "—"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
