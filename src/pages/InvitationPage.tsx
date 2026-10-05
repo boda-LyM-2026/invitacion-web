@@ -88,7 +88,7 @@ export default function InvitationPage() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <ThankYouScreen nombreInvitado={grupo.invitado_principal} />
+            <ThankYouScreen nombreInvitado={grupo.nombre_grupo || grupo.invitado_principal} />
             <Footer />
           </motion.main>
         </AnimatePresence>
@@ -110,7 +110,7 @@ export default function InvitationPage() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Hero nombreInvitado={grupo.invitado_principal} />
+            <Hero nombreInvitado={grupo.nombre_grupo || grupo.invitado_principal} />
             <Countdown />
             <LocationSection />
             <Timeline />

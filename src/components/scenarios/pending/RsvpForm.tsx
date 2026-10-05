@@ -110,7 +110,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
         <Reveal className="text-center" variant="fade-up">
           <p className="eyebrow text-champagne/70">Confirma tu asistencia</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-alabaster sm:text-5xl">
-            {grupo.invitado_principal}, ¿nos acompañas?
+            {(grupo.nombre_grupo || grupo.invitado_principal)}, ¿nos acompañas?
           </h2>
           <OliveDivider className="text-champagne/60" />
           <p className="mt-4 font-body text-sm text-alabaster/70">
