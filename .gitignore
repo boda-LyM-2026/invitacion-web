@@ -20,6 +20,6 @@ vite.config.d.ts
 *.orig
 *.bak
 
-# Esquema de base de datos: se aplica a mano en el SQL Editor de Supabase.
-# El SQL exacto de cada cambio se indica en los commits; no se versiona.
-supabase/
+# NOTA: supabase/schema.sql sí se versiona a propósito. Mientras estuvo en
+# .gitignore, git lo borraba del disco en cada cambio de rama y se perdía.
+# No contiene datos ni secretos: solo el DDL y las funciones de la app.
