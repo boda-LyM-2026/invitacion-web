@@ -38,7 +38,7 @@ export type FilaImportacion = Pick<
 };
 
 /** Clave de comparación de nombres: sin espacios extremos, sin distinguir mayúsculas. */
-function claveNombre(nombre: string): string {
+export function claveNombre(nombre: string): string {
   return nombre.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
@@ -46,7 +46,7 @@ function claveNombre(nombre: string): string {
  * Normaliza la lista: recorta, descarta vacíos y separa los que ya existen en
  * base de datos (id informado) de los nuevos que se deben insertar.
  */
-function limpiarAcompanantes(lista: AcompananteInput[] | undefined): AcompananteInput[] {
+export function limpiarAcompanantes(lista: AcompananteInput[] | undefined): AcompananteInput[] {
   return (lista ?? [])
     .map((a) => ({
       nombre_completo: a.nombre_completo.trim().slice(0, 120),
@@ -60,7 +60,7 @@ function limpiarAcompanantes(lista: AcompananteInput[] | undefined): Acompanante
  * conjunto de nombres ya registrados (BD o filas anteriores del mismo lote).
  * Un nombre que ya existe no se vuelve a escribir.
  */
-function deduplicarAcompanantes(
+export function deduplicarAcompanantes(
   lista: AcompananteInput[],
   yaExistentes: Set<string>,
 ): { lista: AcompananteInput[]; omitidos: number } {
@@ -77,6 +77,34 @@ function deduplicarAcompanantes(
     resultado.push(a);
   }
   return { lista: resultado, omitidos };
+}
+
+/**
+ * Calcula los ajustes de limite_personas tras deduplicar los acompañantes.
+ *
+ * El archivo declara un límite, pero si un acompañante se descartó por estar
+ * repetido, el cupo real queda sobrante. Se corrige solo a la baja: titular más
+ * los acompañantes que de verdad se insertaron.
+ *
+ * Solo baja, nunca sube: un límite menor que la lista de acompañantes viene del
+ * archivo y es un dato a respetar, no una consecuencia de la deduplicación.
+ */
+export function calcularAjustesLimite(
+  filas: FilaImportacion[],
+  idPorToken: Map<string, string>,
+  tokens: string[],
+  limiteReal: Map<string, number>,
+): Array<{ id: string; limite_personas: number }> {
+  const ajustes: Array<{ id: string; limite_personas: number }> = [];
+  filas.forEach((fila, i) => {
+    const grupoId = idPorToken.get(tokens[i]);
+    if (!grupoId) return;
+    const real = (limiteReal.get(grupoId) ?? 0) + 1;
+    if (fila.limite_personas > real) {
+      ajustes.push({ id: grupoId, limite_personas: real });
+    }
+  });
+  return ajustes;
 }
 
 /**
@@ -272,23 +300,12 @@ export function useGuestsAdmin() {
       }));
     });
 
-    // El archivo declara un límite, pero si algún acompañante se descartó por
-    // repetido el cupo real es menor. Ajustamos a la baja para no dejar plazas
-    // de sobra: titular más los acompañantes que efectivamente se insertaron.
-    const ajustes = filas.flatMap((fila, i) => {
-      const grupoId = idPorToken.get(tokens[i]);
-      if (!grupoId) return [];
-      const insertados = limiteReal.get(grupoId) ?? 0;
-      const real = insertados + 1;
-      if (fila.limite_personas === real) return [];
-      return [{ id: grupoId, limite_personas: real }];
-    });
-    if (ajustes.length > 0) {
-      await Promise.all(
-        ajustes.map((a) =>
-          supabase.from("grupos_invitacion").update({ limite_personas: a.limite_personas }).eq("id", a.id),
-        ),
-      );
+    const ajustes = calcularAjustesLimite(filas, idPorToken, tokens, limiteReal);
+    for (const a of ajustes) {
+      await supabase
+        .from("grupos_invitacion")
+        .update({ limite_personas: a.limite_personas })
+        .eq("id", a.id);
     }
 
     let errorAcompanantes: string | null = null;
