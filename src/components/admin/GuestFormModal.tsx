@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import type { NuevoGrupoInput } from "@/hooks/useGuestsAdmin";
+import { AnimatePresence, motion } from "framer-motion";
+import type { AcompananteInput, NuevoGrupoInput } from "@/hooks/useGuestsAdmin";
 import { CATEGORIAS, ESTADOS, ETIQUETAS_ESTADO, IMPORTANCIAS } from "@/config/catalogos";
 import type { CategoriaInvitado, EstadoInvitacion, GrupoInvitacion, Mesa, NivelImportancia } from "@/types/domain";
 
@@ -20,24 +20,67 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
     importancia: grupoInicial?.importancia ?? "estandar",
     mesa_id: grupoInicial?.mesa_id ?? grupoInicial?.mesa?.id ?? null,
     estado: grupoInicial?.estado ?? "pending",
+    acompanantes: (grupoInicial?.acompanantes ?? []).map((a) => ({
+      id: a.id,
+      nombre_completo: a.nombre_completo ?? "",
+    })),
   });
   const [guardando, setGuardando] = useState(false);
 
+  const acompanantes = form.acompanantes ?? [];
+  /**
+   * Los que ya tienen id existen en base de datos: son inmutables. El titular
+   * solo puede agregar nombres nuevos, nunca reemplazar los registrados.
+   */
+  const registrados = acompanantes.filter((a) => Boolean(a.id));
+  const nuevos = acompanantes.filter((a) => !a.id);
+  /** El titular cuenta como una persona: los acompanantes nunca superan el límite - 1. */
+  const maxAcompanantes = Math.max(0, form.limite_personas - 1);
+  const llenados = acompanantes.filter((a) => a.nombre_completo.trim()).length;
+  const excedeLimite = llenados > maxAcompanantes;
+
+  const normalizar = (s: string) => s.trim().toLowerCase();
+  const nombresRegistrados = new Set(registrados.map((a) => normalizar(a.nombre_completo)));
+  /** No se admite un nombre duplicado ni uno que ya esté en base de datos. */
+  const duplicado = nuevos.some(
+    (a) => a.nombre_completo.trim() && nombresRegistrados.has(normalizar(a.nombre_completo)),
+  );
+
+  function actualizarAcompanantes(indice: number, cambios: Partial<AcompananteInput>) {
+    setForm({
+      ...form,
+      acompanantes: acompanantes.map((a, i) => (i === indice ? { ...a, ...cambios } : a)),
+    });
+  }
+
+  function agregarAcompanante() {
+    if (acompanantes.length >= maxAcompanantes) return;
+    setForm({ ...form, acompanantes: [...acompanantes, { nombre_completo: "" }] });
+  }
+
+  function quitarAcompanante(indice: number) {
+    setForm({ ...form, acompanantes: acompanantes.filter((_, i) => i !== indice) });
+  }
+
   async function handleSubmit() {
     setGuardando(true);
-    await onGuardar(form);
+    await onGuardar({
+      ...form,
+      // Solo se envían los nuevos: los registrados no se tocan (ver hook).
+      acompanantes: acompanantes.filter((a) => a.nombre_completo.trim()),
+    });
     setGuardando(false);
   }
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
       <motion.div
-        className="w-full max-w-md rounded-2xl border border-pistachio-200/50 bg-white p-6 shadow-cinematic"
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/40 px-4 py-8 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+      <motion.div
+        className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-pistachio-200/50 bg-white p-8 shadow-cinematic"
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -47,7 +90,10 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
           {grupoInicial ? "Editar grupo" : "Nuevo grupo de invitación"}
         </h2>
 
-        <div className="mt-6 space-y-4">
+        {/* En PC el admin trabaja a dos columnas: datos del grupo a la izquierda,
+            acompañantes a la derecha. En móvil se apilan. */}
+        <div className="mt-6 grid gap-8 lg:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:content-start">
           <div>
             <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
               Nombre del grupo
@@ -80,74 +126,166 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
               className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
-                Categoría
-              </label>
-              <select
-                value={form.categoria}
-                onChange={(e) => setForm({ ...form, categoria: e.target.value as CategoriaInvitado })}
-                className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
-              >
-                {CATEGORIAS.map((c) => (
-                  <option key={c} value={c}>
-                    {c.replace("_", " ")}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
-                Importancia
-              </label>
-              <select
-                value={form.importancia}
-                onChange={(e) => setForm({ ...form, importancia: e.target.value as NivelImportancia })}
-                className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
-              >
-                {IMPORTANCIAS.map((i) => (
-                  <option key={i} value={i}>
-                    {i}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
+              Categoría
+            </label>
+            <select
+              value={form.categoria}
+              onChange={(e) => setForm({ ...form, categoria: e.target.value as CategoriaInvitado })}
+              className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
+            >
+              {CATEGORIAS.map((c) => (
+                <option key={c} value={c}>
+                  {c.replace("_", " ")}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
-                Mesa asignada
+          <div>
+            <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
+              Importancia
+            </label>
+            <select
+              value={form.importancia}
+              onChange={(e) => setForm({ ...form, importancia: e.target.value as NivelImportancia })}
+              className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
+            >
+              {IMPORTANCIAS.map((i) => (
+                <option key={i} value={i}>
+                  {i}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
+              Mesa asignada
+            </label>
+            <select
+              value={form.mesa_id ?? ""}
+              onChange={(e) => setForm({ ...form, mesa_id: e.target.value || null })}
+              className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
+            >
+              <option value="">Sin asignar</option>
+              {mesas.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nombre ? `${m.numero} · ${m.nombre}` : `Mesa ${m.numero}`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
+              Estado
+            </label>
+            <select
+              value={form.estado}
+              onChange={(e) => setForm({ ...form, estado: e.target.value as EstadoInvitacion })}
+              className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
+            >
+              {ESTADOS.map((e) => (
+                <option key={e} value={e}>
+                  {ETIQUETAS_ESTADO[e]}
+                </option>
+              ))}
+            </select>
+          </div>
+          </div>
+
+          {/* Columna derecha: quién acompaña al titular. */}
+          <div className="rounded-xl border border-pistachio-200/60 bg-alabaster/60 p-5 lg:sticky lg:top-0 lg:self-start">
+            <div className="mb-4 flex items-baseline justify-between">
+              <label className="font-body text-xs uppercase tracking-widest2 text-ink-muted">
+                Acompañantes
               </label>
-              <select
-                value={form.mesa_id ?? ""}
-                onChange={(e) => setForm({ ...form, mesa_id: e.target.value || null })}
-                className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
-              >
-                <option value="">Sin asignar</option>
-                {mesas.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.nombre ? `${m.numero} · ${m.nombre}` : `Mesa ${m.numero}`}
-                  </option>
-                ))}
-              </select>
+              <span className="font-body text-xs text-ink-muted">
+                {llenados} de {maxAcompanantes}
+              </span>
             </div>
-            <div>
-              <label className="mb-1 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
-                Estado
-              </label>
-              <select
-                value={form.estado}
-                onChange={(e) => setForm({ ...form, estado: e.target.value as EstadoInvitacion })}
-                className="w-full rounded-xl border border-pistachio-200 bg-alabaster px-4 py-3 font-body text-sm text-ink focus:border-olive focus:outline-none"
-              >
-                {ESTADOS.map((e) => (
-                  <option key={e} value={e}>
-                    {ETIQUETAS_ESTADO[e]}
-                  </option>
-                ))}
-              </select>
+
+            <div className="space-y-2">
+              {registrados.map((acompanante) => (
+                <div
+                  key={acompanante.id}
+                  className="flex items-center gap-2 rounded-lg border border-pistachio-200/60 bg-pistachio-50/70 px-3 py-2.5"
+                >
+                  <span className="min-w-0 flex-1 truncate font-body text-sm text-ink">
+                    {acompanante.nombre_completo}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-olive/10 px-2 py-0.5 font-body text-[10px] uppercase tracking-wider text-olive-900">
+                    Registrado
+                  </span>
+                </div>
+              ))}
+
+              <AnimatePresence initial={false}>
+                {nuevos.map((acompanante) => {
+                  const indice = acompanantes.indexOf(acompanante);
+                  return (
+                    <motion.div
+                      key={indice}
+                      className="flex items-center gap-2"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <input
+                        value={acompanante.nombre_completo}
+                        onChange={(e) =>
+                          actualizarAcompanantes(indice, { nombre_completo: e.target.value })
+                        }
+                        placeholder="Nombre del acompañante"
+                        className="min-w-0 flex-1 rounded-lg border border-pistachio-200 bg-white px-3 py-2.5 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none"
+                      />
+                      <motion.button
+                        type="button"
+                        onClick={() => quitarAcompanante(indice)}
+                        aria-label={`Quitar acompañante ${acompanante.nombre_completo || "nuevo"}`}
+                        className="shrink-0 rounded-lg px-2 py-1.5 font-body text-sm text-ink-muted transition-colors hover:bg-pistachio-50 hover:text-olive-900"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        ×
+                      </motion.button>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+
+              {acompanantes.length === 0 && (
+                <p className="font-body text-xs text-ink-muted">
+                  Sin acompanantes registrados. El titular es la única persona del grupo.
+                </p>
+              )}
             </div>
+
+            {registrados.length > 0 && (
+              <p className="mt-4 font-body text-xs text-ink-muted">
+                Los registrados no se pueden modificar ni eliminar. Solo puedes añadir los que falten.
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={agregarAcompanante}
+              disabled={acompanantes.length >= maxAcompanantes}
+              className="mt-4 rounded-lg border border-pistachio-200 px-3 py-2 font-body text-xs text-olive-900 transition-colors hover:bg-pistachio-50 disabled:opacity-40"
+            >
+              + Añadir acompañante
+            </button>
+
+            {excedeLimite && (
+              <p className="mt-2 font-body text-xs text-red-700">
+                Hay más acompanantes que personas permitidas. Sube el límite o quita alguno.
+              </p>
+            )}
+            {duplicado && (
+              <p className="mt-2 font-body text-xs text-red-700">
+                Ese nombre ya está registrado como acompañante.
+              </p>
+            )}
           </div>
         </div>
 
@@ -162,7 +300,9 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
           </motion.button>
           <motion.button
             onClick={handleSubmit}
-            disabled={guardando || !form.nombre_grupo || !form.invitado_principal}
+            disabled={
+              guardando || !form.nombre_grupo || !form.invitado_principal || excedeLimite || duplicado
+            }
             className="rounded-xl bg-olive px-5 py-2.5 font-body text-sm text-alabaster shadow-soft transition-all hover:bg-olive-500 disabled:opacity-50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
