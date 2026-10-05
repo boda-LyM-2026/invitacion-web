@@ -13,3 +13,9 @@ vite.config.d.ts
 # Comprimidos
 *.zip
 *.tar.gz
+
+# Scratch / archivos temporales de sesión (no se versionan)
+.tmp/
+*.rej
+*.orig
+*.bak
