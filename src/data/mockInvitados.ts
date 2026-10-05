@@ -38,8 +38,8 @@ export const MOCK_GRUPOS: Record<string, GrupoInvitacion> = {
     respondido_en: "2026-06-05T18:30:00-04:00",
     creado_en: "2026-06-01T10:00:00-04:00",
     acompanantes: [
-      { id: "a1", grupo_id: "2", nombre_completo: "Jorge Rojas", es_nino: false, confirmado: true },
-      { id: "a2", grupo_id: "2", nombre_completo: "Valentina Rojas", es_nino: true, confirmado: true },
+      { id: "a1", grupo_id: "2", nombre_completo: "Jorge Rojas", confirmado: true },
+      { id: "a2", grupo_id: "2", nombre_completo: "Valentina Rojas", confirmado: true },
     ],
     mesa: { id: "m4", numero: 4, nombre: "Mesa Olivo", capacidad: 8, pos_x: 60, pos_y: 30 },
   },

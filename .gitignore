@@ -13,3 +13,13 @@ vite.config.d.ts
 # Comprimidos
 *.zip
 *.tar.gz
+
+# Scratch / archivos temporales de sesión (no se versionan)
+.tmp/
+*.rej
+*.orig
+*.bak
+
+# Esquema de base de datos: se aplica a mano en el SQL Editor de Supabase.
+# El SQL exacto de cada cambio se indica en los commits; no se versiona.
+supabase/

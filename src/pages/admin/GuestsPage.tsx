@@ -35,7 +35,9 @@ export default function GuestsPage() {
       const okBusqueda =
         !q ||
         g.nombre_grupo.toLowerCase().includes(q) ||
-        g.invitado_principal.toLowerCase().includes(q);
+        g.invitado_principal.toLowerCase().includes(q) ||
+        // Un acompañante también debe aparecer al buscarlo por su nombre.
+        g.acompanantes.some((a) => (a.nombre_completo ?? "").toLowerCase().includes(q));
       return okCategoria && okEstado && okBusqueda;
     });
   }, [grupos, busqueda, categoria, estado]);
@@ -58,10 +60,18 @@ export default function GuestsPage() {
   }
 
   async function handleImportar(filas: Parameters<typeof crearLote>[0]) {
-    const { ok, error } = await crearLote(filas);
-    toast(error ?? `${ok} grupos importados.`, error ? "error" : "success");
-    if (!error) setImportandoAbierto(false);
-    return error;
+    const { ok, error, omitidos } = await crearLote(filas);
+    if (error) {
+      toast(error, "error");
+      return error;
+    }
+    const resumen =
+      omitidos > 0
+        ? `${ok} grupos importados. ${omitidos} acompañante(s) omitido(s) por nombre duplicado.`
+        : `${ok} grupos importados.`;
+    toast(resumen, omitidos > 0 ? "info" : "success");
+    setImportandoAbierto(false);
+    return null;
   }
 
   // xlsx/jsPDF (exportUtils) se cargan bajo demanda: no deben pesar

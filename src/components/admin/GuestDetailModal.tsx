@@ -144,7 +144,7 @@ export function GuestDetailModal({ grupo, onCerrar }: GuestDetailModalProps) {
                 <li key={a.id} className="flex items-center justify-between px-4 py-2.5 font-body text-sm">
                   <span className="text-ink-light">{a.nombre_completo ?? "Sin nombre"}</span>
                   <span className="text-xs text-ink-muted">
-                    {a.es_nino ? "niño" : "adulto"} · {a.confirmado ? "confirmado" : "sin confirmar"}
+                    {a.confirmado ? "confirmado" : "sin confirmar"}
                   </span>
                 </li>
               ))}
