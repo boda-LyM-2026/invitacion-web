@@ -26,7 +26,8 @@ function personasConfirmadas(g: GrupoInvitacion): number {
 
 function enlaceWhatsApp(g: GrupoInvitacion): string {
   const url = enlaceInvitacion(g.access_token);
-  const texto = `Hola ${g.invitado_principal}, te invitamos a la boda de ${NOMBRE_NOVIOS}. Confirma tu asistencia aquí: ${url}`;
+  const destinatario = g.nombre_grupo || g.invitado_principal;
+  const texto = `Hola ${destinatario}, te invitamos a la boda de ${NOMBRE_NOVIOS}. Confirma tu asistencia aquí: ${url}`;
   return `https://wa.me/?text=${encodeURIComponent(texto)}`;
 }
 
