@@ -107,15 +107,9 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
 
       <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
-<<<<<<< HEAD
           <p className="eyebrow text-champagne/70">Confirma tu asistencia</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-alabaster sm:text-5xl">
             {(grupo.nombre_grupo || grupo.invitado_principal)}, ¿nos acompañas?
-=======
-          <p className="eyebrow text-olive/60">Confirma tu asistencia</p>
-          <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
-            {grupo.invitado_principal}, ¿nos acompañas?
->>>>>>> origin/update/background
           </h2>
           <OliveDivider className="text-pistachio-400" />
           <p className="mt-4 font-body text-sm text-ink-light">
@@ -191,18 +185,6 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
                     placeholder="Nombre completo"
                     className="w-full rounded-xl border border-pistachio-200 bg-white/90 px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
                   />
-<<<<<<< HEAD
-=======
-                  <label className="mt-3 flex items-center gap-3 font-body text-xs text-ink-muted">
-                    <input
-                      type="checkbox"
-                      checked={a.es_nino}
-                      onChange={(e) => actualizarAcompanante(i, { es_nino: e.target.checked })}
-                      className="h-4 w-4 rounded border-pistachio-300 accent-olive"
-                    />
-                    Es niño/a
-                  </label>
->>>>>>> origin/update/background
                 </motion.div>
               ))}
             </motion.div>
