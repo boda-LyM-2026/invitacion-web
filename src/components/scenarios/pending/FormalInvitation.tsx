@@ -8,12 +8,12 @@ export function FormalInvitation() {
     <section className="section-cinematic film-grain">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/tarjetas-con-nombres-invitados.jpg')" }}
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/90 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="blur-in">
           <div className="card-surface shimmer-border mx-auto max-w-lg p-8 md:p-12">
             {/* Decorative top line */}

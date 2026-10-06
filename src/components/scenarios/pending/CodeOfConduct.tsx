@@ -12,12 +12,12 @@ export function CodeOfConduct() {
     <section className="section-cinematic film-grain">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/herramientas-para-cortar-pastel.jpg')" }}
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
           <p className="eyebrow">Antes de venir</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
@@ -31,7 +31,7 @@ export function CodeOfConduct() {
             {REGLAS.map((regla, i) => (
               <motion.li
                 key={regla}
-                className="flex items-start gap-4 rounded-2xl bg-white/60 p-4 shadow-glass backdrop-blur-sm transition-all duration-500 hover:shadow-glow-olive"
+                className="flex items-start gap-4 rounded-2xl bg-white/80 p-4 shadow-glass transition-all duration-500 hover:shadow-glow-olive"
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}

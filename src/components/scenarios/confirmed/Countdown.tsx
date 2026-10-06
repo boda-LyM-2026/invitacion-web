@@ -19,15 +19,15 @@ export function Countdown() {
     <section className="section-cinematic relative overflow-hidden">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/ramo-de-flores.jpg')" }}
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
       {/* Particles */}
       <ParticleField count={25} color="rgba(130,134,97,0.3)" />
 
-      <div className="relative z-10 text-center">
+      <div className="section-content relative z-10 text-center">
         <Reveal variant="fade-up">
           <p className="eyebrow">Falta poco</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">

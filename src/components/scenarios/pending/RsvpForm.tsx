@@ -66,13 +66,13 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
   if (exito) {
     return (
       <section id="rsvp" className="section-cinematic relative overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/mesa-fondo-jardin-1.jpg')" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
+      <div
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
+      />
+      <div className="absolute inset-0 bg-alabaster/30" />
         <motion.div
-          className="relative z-10 flex min-h-[50vh] flex-col items-center justify-center text-center"
+          className="section-content relative z-10 flex min-h-[50vh] flex-col items-center justify-center text-center"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
@@ -85,10 +85,10 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
           >
             ✓
           </motion.div>
-          <h2 className="mt-6 font-display text-3xl font-light italic text-alabaster">
+          <h2 className="mt-6 font-display text-3xl font-light italic text-olive-900">
             ¡Gracias por confirmar!
           </h2>
-          <p className="mt-4 font-body text-sm text-champagne/80">
+          <p className="mt-4 font-body text-sm text-ink-light">
             Tu respuesta ha sido registrada exitosamente.
           </p>
         </motion.div>
@@ -99,22 +99,28 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
   return (
     <section id="rsvp" className="section-cinematic relative overflow-hidden">
       {/* Background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-2.jpg')" }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-olive/90 to-cinematic-dark/90" />
+        <div
+          className="absolute inset-0 bg-fixed bg-cover bg-center"
+          style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
+        />
+        <div className="absolute inset-0 bg-alabaster/30" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
+<<<<<<< HEAD
           <p className="eyebrow text-champagne/70">Confirma tu asistencia</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-alabaster sm:text-5xl">
             {(grupo.nombre_grupo || grupo.invitado_principal)}, ¿nos acompañas?
+=======
+          <p className="eyebrow text-olive/60">Confirma tu asistencia</p>
+          <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
+            {grupo.invitado_principal}, ¿nos acompañas?
+>>>>>>> origin/update/background
           </h2>
-          <OliveDivider className="text-champagne/60" />
-          <p className="mt-4 font-body text-sm text-alabaster/70">
-            Tu grupo tiene {grupo.limite_personas}{" "}
-            {grupo.limite_personas === 1 ? "lugar" : "lugares"} reservados.
+          <OliveDivider className="text-pistachio-400" />
+          <p className="mt-4 font-body text-sm text-ink-light">
+            Tu grupo tiene {grupo.limite_personas} {grupo.limite_personas === 1 ? "lugar" : "lugares"}{" "}
+            reservados.
           </p>
         </Reveal>
 
@@ -125,8 +131,8 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
             onClick={() => setIntencion("confirmed")}
             className={`relative overflow-hidden rounded-full px-10 py-4 font-body text-sm uppercase tracking-[0.18em] transition-all duration-500 ${
               intencion === "confirmed"
-                ? "bg-alabaster text-olive shadow-glow-champagne"
-                : "bg-alabaster/10 text-alabaster border border-alabaster/30 hover:bg-alabaster/20"
+                ? "bg-olive text-alabaster shadow-glow-olive"
+                : "border border-olive/30 bg-white/80 text-olive-900 hover:bg-pistachio-50"
             }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
@@ -146,8 +152,8 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
             onClick={() => setIntencion("declined")}
             className={`rounded-full px-10 py-4 font-body text-sm uppercase tracking-[0.18em] transition-all duration-500 ${
               intencion === "declined"
-                ? "bg-alabaster/20 text-alabaster border border-alabaster/50"
-                : "bg-transparent text-alabaster/70 border border-alabaster/20 hover:bg-alabaster/10"
+                ? "border border-olive/40 bg-pistachio-50/80 text-olive-900"
+                : "border border-olive/20 bg-white/70 text-ink-muted hover:bg-pistachio-50"
             }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
@@ -166,16 +172,16 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
               transition={{ duration: 0.5 }}
               className="mx-auto mt-10 max-w-md space-y-4"
             >
-              <p className="eyebrow text-center text-champagne/70">Acompañantes</p>
+              <p className="eyebrow text-center text-olive/60">Acompañantes</p>
               {acompanantes.map((a, i) => (
                 <motion.div
                   key={a.id ?? i}
-                  className="rounded-2xl bg-alabaster/10 p-5 backdrop-blur-sm"
+                  className="rounded-2xl border border-pistachio-200/50 bg-white/90 p-5 shadow-soft"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                 >
-                  <label className="mb-2 block font-body text-xs uppercase tracking-widest2 text-champagne/60">
+                  <label className="mb-2 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
                     Invitado {i + 1}
                   </label>
                   <input
@@ -183,8 +189,20 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
                     value={a.nombre_completo}
                     onChange={(e) => actualizarAcompanante(i, { nombre_completo: e.target.value })}
                     placeholder="Nombre completo"
-                    className="w-full rounded-xl border border-alabaster/20 bg-alabaster/90 px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
+                    className="w-full rounded-xl border border-pistachio-200 bg-white/90 px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
                   />
+<<<<<<< HEAD
+=======
+                  <label className="mt-3 flex items-center gap-3 font-body text-xs text-ink-muted">
+                    <input
+                      type="checkbox"
+                      checked={a.es_nino}
+                      onChange={(e) => actualizarAcompanante(i, { es_nino: e.target.checked })}
+                      className="h-4 w-4 rounded border-pistachio-300 accent-olive"
+                    />
+                    Es niño/a
+                  </label>
+>>>>>>> origin/update/background
                 </motion.div>
               ))}
             </motion.div>
@@ -199,19 +217,19 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
               animate={{ opacity: 1 }}
               className="mx-auto mt-8 max-w-md"
             >
-              <label className="mb-2 block font-body text-xs uppercase tracking-widest2 text-champagne/60">
+              <label className="mb-2 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
                 Mensaje para los novios (opcional)
               </label>
               <textarea
                 value={mensaje}
                 onChange={(e) => setMensaje(e.target.value)}
                 rows={3}
-                className="w-full rounded-xl border border-alabaster/20 bg-alabaster/90 px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
+                className="w-full rounded-xl border border-pistachio-200 bg-white/90 px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
                 placeholder="Déjales unas palabras..."
               />
 
               {error && (
-                <p className="mt-4 text-center font-body text-sm text-champagne">{error}</p>
+                <p className="mt-4 text-center font-body text-sm text-olive-700">{error}</p>
               )}
 
               <motion.button

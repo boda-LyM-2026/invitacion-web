@@ -6,12 +6,12 @@ export function DressCode() {
     <section className="section-cinematic film-grain">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-2.jpg')" }}
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
           <p className="eyebrow">Antes de venir</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
