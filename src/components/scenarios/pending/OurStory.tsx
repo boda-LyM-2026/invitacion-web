@@ -70,12 +70,12 @@ export function OurStory() {
     <section className="section-cinematic film-grain">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/ramo-de-flores.jpg')" }}
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-white/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
           <p className="eyebrow">Nuestra historia</p>
           <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">

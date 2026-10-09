@@ -11,17 +11,17 @@ export function ThankYouScreen({ nombreInvitado }: ThankYouScreenProps) {
     <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-6 text-center">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/ramo-de-flores.jpg')" }}
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-alabaster/85 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
       {/* Particles dispersing */}
       <ParticleField count={35} color="rgba(130,134,97,0.4)" />
 
       {/* Content */}
       <motion.div
-        className="relative z-10"
+        className="section-content relative z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.5 }}

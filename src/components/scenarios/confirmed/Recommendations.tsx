@@ -65,31 +65,31 @@ export function Recommendations() {
     <section className="section-cinematic relative overflow-hidden">
       {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/mesa-fondo-jardin-2.jpg')" }}
+        className="absolute inset-0 bg-fixed bg-cover bg-center"
+        style={{ backgroundImage: "url('/fondo-white.jpeg')" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-cinematic-dark/90 via-olive/85 to-cinematic-dark/90" />
+      <div className="absolute inset-0 bg-alabaster/30" />
 
-      <div className="relative z-10">
+      <div className="section-content relative z-10">
         <Reveal className="text-center" variant="fade-up">
-          <p className="eyebrow text-champagne/70">Para tener en cuenta</p>
-          <h2 className="mt-4 font-display text-4xl font-light italic text-alabaster sm:text-5xl">
-            Recomendaciones
+          <p className="eyebrow">Recomendaciones para el día</p>
+          <h2 className="mt-4 font-display text-4xl font-light italic text-olive-900 sm:text-5xl">
+            Para disfrutarlo al máximo
           </h2>
-          <OliveDivider className="text-champagne/60" />
+          <OliveDivider className="text-pistachio-400" />
         </Reveal>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-3">
           {GRUPOS.map((grupo, i) => (
             <Reveal key={grupo.titulo} delay={i * 0.15} variant="fade-up">
               <motion.div
-                className="glass-card h-full p-6"
+                className="card-surface h-full p-6"
                 whileHover={{ y: -5, boxShadow: "0 20px 60px -20px rgba(10,10,10,0.3)" }}
                 transition={{ duration: 0.3 }}
               >
                 <div className="mb-4 flex items-center gap-3">
-                  <grupo.Icon className="h-6 w-6 text-champagne" />
-                  <h3 className="font-display text-xl font-light text-alabaster">
+                  <grupo.Icon className="h-6 w-6 text-olive" />
+                  <h3 className="font-display text-xl font-light text-olive-900">
                     {grupo.titulo}
                   </h3>
                 </div>
@@ -100,8 +100,8 @@ export function Recommendations() {
                         key={item}
                         className={
                           j === 0
-                            ? "font-display text-lg font-light text-alabaster"
-                            : "font-body text-sm leading-relaxed text-alabaster/80"
+                            ? "font-display text-lg font-light text-olive-900"
+                            : "font-body text-sm leading-relaxed text-ink-light"
                         }
                         initial={{ opacity: 0, y: 8 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -117,13 +117,13 @@ export function Recommendations() {
                   {grupo.items.map((item, j) => (
                     <motion.li
                       key={item}
-                      className="flex items-start gap-3 font-body text-sm text-alabaster/80"
+                      className="flex items-start gap-3 font-body text-sm text-ink-light"
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.4 + i * 0.15 + j * 0.1 }}
                     >
-                      <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-champagne/60" />
+                      <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-olive/60" />
                       {item}
                     </motion.li>
                   ))}
