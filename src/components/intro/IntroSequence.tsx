@@ -1046,7 +1046,32 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
       {/* ---------------- Botón play de la revelación (donde antes iba "Omitir") ---------------- */}
       <AnimatePresence>
         {esperandoClickRevelacion && (
-          <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2">
+          <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-3">
+            <motion.div
+              className="flex flex-col items-center gap-2"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: [0, 8, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{
+                opacity: { duration: 0.8 },
+                y: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+              }}
+            >
+              <span className="text-center font-body text-[0.6rem] uppercase tracking-widest2 text-champagne/50">
+                Haz Click para continuar
+              </span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-champagne/50"
+              >
+                <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+              </svg>
+            </motion.div>
             <motion.button
               onClick={(e) => {
                 e.stopPropagation();

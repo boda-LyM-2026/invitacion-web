@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { OliveDivider } from "./OliveDivider";
 import { NOMBRE_NOVIOS, FECHA_BODA_TEXTO } from "@/config/wedding";
@@ -6,8 +7,16 @@ interface HeroProps {
   nombreInvitado?: string;
 }
 
-const FOTO_PRINCIPAL =
-  "/images/novios/novios-3.jpg";
+const FOTOS_NOVIOS = [
+  "/images/novios/novios-1.jpg",
+  "/images/novios/novios-2.jpg",
+  "/images/novios/novios-3.jpg",
+];
+
+/** Milisegundos que cada foto permanece visible antes de empezar a desvanecerse. */
+const DURACION_FOTO_MS = 5000;
+/** Duración del fundido cruzado entre fotos (la siguiente entra mientras la actual sale). */
+const DURACION_FADE_MS = 1500;
 
 export function Hero({ nombreInvitado }: HeroProps) {
   const { scrollY } = useScroll();
@@ -15,19 +24,37 @@ export function Hero({ nombreInvitado }: HeroProps) {
   const opacity = useTransform(scrollY, [0, 400], [1, 0.3]);
   const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
 
+  const [fotoActiva, setFotoActiva] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const intervalo = window.setInterval(() => {
+      setFotoActiva((prev) => (prev + 1) % FOTOS_NOVIOS.length);
+    }, DURACION_FOTO_MS);
+    return () => window.clearInterval(intervalo);
+  }, []);
+
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-cinematic-black text-alabaster">
       {/* Parallax background image */}
       <motion.div className="absolute inset-0" style={{ y, scale }}>
-        <img
-          src={FOTO_PRINCIPAL}
-          alt="Lenan y Mauricio"
-          width={1200}
-          height={1800}
-          className="h-full w-full object-cover"
-          loading="eager"
-          fetchPriority="high"
-        />
+        {FOTOS_NOVIOS.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={i === 0 ? "Lenan y Mauricio" : ""}
+            aria-hidden={i !== 0}
+            width={1200}
+            height={1800}
+            className="absolute inset-0 h-full w-full object-cover transition-opacity ease-in-out"
+            style={{
+              opacity: i === fotoActiva ? 1 : 0,
+              transitionDuration: `${DURACION_FADE_MS}ms`,
+            }}
+            loading="eager"
+            fetchPriority={i === 0 ? "high" : "auto"}
+          />
+        ))}
       </motion.div>
 
       {/* Cinematic overlays */}
