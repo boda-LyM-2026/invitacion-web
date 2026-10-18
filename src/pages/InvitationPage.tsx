@@ -14,6 +14,7 @@ import { OurStory } from "@/components/scenarios/pending/OurStory";
 import { FormalInvitation } from "@/components/scenarios/pending/FormalInvitation";
 import { DressCode } from "@/components/scenarios/pending/DressCode";
 import { CodeOfConduct } from "@/components/scenarios/pending/CodeOfConduct";
+import { GiftsSection } from "@/components/scenarios/shared/GiftsSection";
 import { RsvpForm } from "@/components/scenarios/pending/RsvpForm";
 
 import { Countdown } from "@/components/scenarios/confirmed/Countdown";
@@ -115,6 +116,7 @@ export default function InvitationPage() {
             <LocationSection />
             <Timeline />
             <TableAssignment mesa={grupo.mesa} />
+            <GiftsSection />
             <Recommendations />
             <Footer />
           </motion.main>
@@ -139,10 +141,11 @@ export default function InvitationPage() {
         >
           <Hero nombreInvitado={grupo.invitado_principal} />
           <OurStory />
-          <FormalInvitation />
-          <DressCode />
-          <CodeOfConduct />
-          <RsvpForm grupo={grupo} onSuccess={refetch} />
+            <FormalInvitation />
+            <DressCode />
+            <GiftsSection />
+            <CodeOfConduct />
+            <RsvpForm grupo={grupo} onSuccess={refetch} />
           <Footer />
         </motion.main>
       </AnimatePresence>
