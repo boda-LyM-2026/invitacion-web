@@ -7,7 +7,7 @@ interface HeroProps {
 }
 
 const FOTO_PRINCIPAL =
-  "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop";
+  "/images/novios/novios-3.jpg";
 
 export function Hero({ nombreInvitado }: HeroProps) {
   const { scrollY } = useScroll();

@@ -546,11 +546,20 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  const [esperandoClickRevelacion, setEsperandoClickRevelacion] = useState(false);
+
   // Avanzador de fases.
   useEffect(() => {
-    if (saliendo) return;
+    if (saliendo || esperandoClickRevelacion) return;
     const idx = ORDEN.indexOf(fase);
     faseRef.current = fase;
+
+    if (fase === "revelacion") {
+      timeoutRef.current = window.setTimeout(() => {
+        setEsperandoClickRevelacion(true);
+      }, DURACIONES[fase]);
+      return;
+    }
 
     if (idx === ORDEN.length - 1) {
       timeoutRef.current = window.setTimeout(() => setSaliendo(true), DURACIONES[fase]);
@@ -564,7 +573,7 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
         timeoutRef.current = null;
       }
     };
-  }, [fase, saliendo]);
+  }, [fase, saliendo, esperandoClickRevelacion]);
 
   // Efectos de sonido atados a los hitos visuales.
   useEffect(() => {
@@ -581,6 +590,11 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
+    }
+    if (esperandoClickRevelacion) {
+      window.dispatchEvent(new CustomEvent("iniciar-musica-boda"));
+      setSaliendo(true);
+      return;
     }
     if (ORDEN.indexOf(faseRef.current) >= ORDEN.length - 1) return;
     setSaliendo(true);
@@ -759,21 +773,28 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
 
             {/* Carta (detrás de solapas, se eleva al abrir) */}
             <motion.div
-              className="absolute inset-x-4 top-2 z-[5] h-44 overflow-hidden rounded-[3px] sm:h-48"
+              className={`absolute inset-x-4 top-2 z-[5] h-44 overflow-hidden rounded-[3px] sm:h-48 ${esperandoClickRevelacion ? "cursor-pointer" : ""}`}
               style={{
                 backfaceVisibility: "hidden",
                 boxShadow:
                   "0 6px 22px rgba(0,0,0,0.28), inset 0 0 46px rgba(120,95,40,0.10)",
               }}
+              onClick={() => {
+                if (esperandoClickRevelacion) {
+                  window.dispatchEvent(new CustomEvent("iniciar-musica-boda"));
+                  setEsperandoClickRevelacion(false);
+                  setSaliendo(true);
+                }
+              }}
               animate={
-                fase === "revelacion"
+                fase === "revelacion" || esperandoClickRevelacion
                   ? { y: "-98px", scale: 1.1, filter: ["blur(2px)", "blur(0px)"] }
                   : fase === "apertura"
                     ? { y: "-36px", scale: 1.04, filter: "blur(0px)" }
                     : { y: 0, scale: 0.92, filter: "blur(0px)" }
               }
               transition={
-                fase === "revelacion"
+                fase === "revelacion" && !esperandoClickRevelacion
                   ? {
                       y: { duration: sec(DURACIONES.revelacion), ease: [0.22, 1, 0.36, 1] },
                       scale: { duration: sec(DURACIONES.revelacion), ease: [0.22, 1, 0.36, 1] },
@@ -796,8 +817,8 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
                 <motion.p
                   className="eyebrow text-ink-muted/70"
                   animate={{
-                    opacity: fase === "revelacion" ? 1 : 0,
-                    y: fase === "revelacion" ? 0 : 10,
+                    opacity: fase === "revelacion" || esperandoClickRevelacion ? 1 : 0,
+                    y: fase === "revelacion" || esperandoClickRevelacion ? 0 : 10,
                   }}
                   transition={{ delay: sec(DURACIONES.revelacion) * 0.45, duration: 0.6 }}
                 >
@@ -808,7 +829,7 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
                 <h1 className="mt-3 font-display text-3xl font-light italic text-olive-900 sm:text-4xl">
                   <ScriptReveal
                     text={novios}
-                    play={fase === "revelacion"}
+                    play={fase === "revelacion" || esperandoClickRevelacion}
                     delay={fase === "revelacion" ? 0.15 : undefined}
                   />
                 </h1>
@@ -817,13 +838,14 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
                 <motion.p
                   className="mt-3 font-body text-[0.7rem] uppercase tracking-[0.22em] text-ink-muted/80"
                   animate={{
-                    opacity: fase === "revelacion" ? 1 : 0,
-                    y: fase === "revelacion" ? 0 : 6,
+                    opacity: fase === "revelacion" || esperandoClickRevelacion ? 1 : 0,
+                    y: fase === "revelacion" || esperandoClickRevelacion ? 0 : 6,
                   }}
                   transition={{ delay: sec(DURACIONES.revelacion) * 0.6, duration: 0.6 }}
                 >
                   {FECHA_BODA_TEXTO}
                 </motion.p>
+
               </div>
 
               {/* Sombra que el flap superior proyecta sobre la carta; se
@@ -1021,19 +1043,40 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
         )}
       </AnimatePresence>
 
-      {/* ---------------- Skip button ---------------- */}
-      <motion.button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleSkip();
-        }}
-        className="absolute bottom-8 z-50 font-body text-xs uppercase tracking-widest2 text-alabaster/50 underline-offset-4 transition-colors hover:text-alabaster/80 hover:underline"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 1 }}
-      >
-        Omitir
-      </motion.button>
+      {/* ---------------- Botón play de la revelación (donde antes iba "Omitir") ---------------- */}
+      <AnimatePresence>
+        {esperandoClickRevelacion && (
+          <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2">
+            <motion.button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent("iniciar-musica-boda"));
+                setEsperandoClickRevelacion(false);
+                setSaliendo(true);
+              }}
+              aria-label="Reproducir la música y continuar"
+              className="relative flex h-14 w-14 items-center justify-center rounded-full border border-champagne/40 bg-cinematic-dark/60 text-champagne/80 backdrop-blur-md transition-colors hover:border-champagne/70 hover:text-champagne"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {/* Anillo pulsante que invita al clic */}
+              <motion.span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full border border-champagne/30"
+                animate={{ scale: [1, 1.3, 1], opacity: [0.7, 0, 0.7] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </motion.button>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ---------------- Sonido on/off ---------------- */}
       <motion.button

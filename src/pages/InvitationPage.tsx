@@ -90,6 +90,7 @@ export default function InvitationPage() {
             transition={{ duration: 0.8 }}
           >
             <ThankYouScreen nombreInvitado={grupo.nombre_grupo || grupo.invitado_principal} />
+            <GiftsSection />
             <Footer />
           </motion.main>
         </AnimatePresence>

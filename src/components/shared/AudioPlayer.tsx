@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface AudioPlayerProps {
   src?: string;
@@ -9,8 +9,7 @@ interface AudioPlayerProps {
 export function AudioPlayer({ src = "/audio/background-music.mp3", className = "" }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
+
   // Si el archivo no existe (no subido en deploy) el reproductor no aparece.
   const [indisponible, setIndisponible] = useState(false);
 
@@ -23,14 +22,23 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
+    const iniciarMusica = () => {
+      if (audio.paused) {
+        audio.currentTime = 0;
+        audio.play().then(() => setIsPlaying(true)).catch(() => {});
+      }
+    };
+
     audio.addEventListener("error", handleError);
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
+    window.addEventListener("iniciar-musica-boda", iniciarMusica);
 
     return () => {
       audio.removeEventListener("error", handleError);
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
+      window.removeEventListener("iniciar-musica-boda", iniciarMusica);
     };
   }, []);
 
@@ -48,13 +56,6 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
     setIsPlaying(!isPlaying);
   };
 
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.muted = !audio.muted;
-    setIsMuted(!isMuted);
-  };
-
   if (indisponible) return null;
 
   return (
@@ -67,19 +68,7 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 3, duration: 1 }}
       >
-        {/* Tooltip */}
-        <AnimatePresence>
-          {showTooltip && (
-            <motion.div
-              className="absolute right-14 whitespace-nowrap rounded-full bg-cinematic-dark/90 px-4 py-2 font-body text-xs text-alabaster shadow-cinematic backdrop-blur-sm"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-            >
-              {isPlaying ? "Pausar música" : "Reproducir música"}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* Control buttons */}
         <div className="flex items-center gap-1 rounded-full bg-cinematic-dark/80 p-1.5 shadow-cinematic backdrop-blur-md">
@@ -89,8 +78,7 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
             className="flex h-10 w-10 items-center justify-center rounded-full bg-olive/80 text-alabaster transition-colors hover:bg-olive"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
+
             aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
           >
             {isPlaying ? (
@@ -104,32 +92,10 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
               </svg>
             )}
           </motion.button>
-
-          {/* Mute */}
-          <motion.button
-            onClick={toggleMute}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-alabaster/60 transition-colors hover:text-alabaster"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label={isMuted ? "Activar sonido" : "Silenciar"}
-          >
-            {isMuted ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                <line x1="23" y1="9" x2="17" y2="15" />
-                <line x1="17" y1="9" x2="23" y2="15" />
-              </svg>
-            ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-              </svg>
-            )}
-          </motion.button>
         </div>
 
         {/* Sound waves animation */}
-        {isPlaying && !isMuted && (
+        {isPlaying && (
           <motion.div
             className="absolute -left-8 flex items-end gap-0.5"
             initial={{ opacity: 0 }}
