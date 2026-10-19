@@ -29,6 +29,7 @@ function EstadoCarga() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-cinematic-dark">
       <motion.div
+        className="rounded-full"
         animate={{
           boxShadow: [
             "0 0 20px rgba(130,134,97,0.2)",

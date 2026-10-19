@@ -685,7 +685,7 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
         transition={{ duration: 0.8 }}
         aria-hidden="true"
       >
-        {"Nos casamos".split("").map((ch, i) => (
+        {"¡Nos casamos!".split("").map((ch, i) => (
           <motion.span
             key={i}
             className="inline-block"
