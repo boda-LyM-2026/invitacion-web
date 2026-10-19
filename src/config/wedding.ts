@@ -5,7 +5,7 @@
  */
 export const NOMBRE_NOVIOS = "Lenan & Mauricio";
 
-export const FECHA_BODA_TEXTO = "14 de noviembre de 2026";
+export const FECHA_BODA_TEXTO = "21 de noviembre de 2026";
 
 export const HORA_BODA_TEXTO = "3:30 p.m.";
 
@@ -17,4 +17,4 @@ export const LUGAR_BODA_MAPS = "https://maps.app.goo.gl/KKBNhSJ2pUvXe4Ae9";
 
 /** ISO con offset usado por el countdown; se puede sobreescribir vía env. */
 export const FECHA_BODA_ISO =
-  (import.meta.env.VITE_WEDDING_DATETIME as string | undefined) ?? "2026-11-14T18:00:00-04:00";
+  (import.meta.env.VITE_WEDDING_DATETIME as string | undefined) ?? "2026-11-21T18:00:00-04:00";

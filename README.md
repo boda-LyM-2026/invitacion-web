@@ -47,7 +47,7 @@ npm run dev
 |---|---|
 | `VITE_SUPABASE_URL` | URL del proyecto Supabase |
 | `VITE_SUPABASE_ANON_KEY` | anon public key (nunca la `service_role`) |
-| `VITE_WEDDING_DATETIME` | Fecha del evento en ISO con offset (default `2026-11-14T18:00:00-04:00`) |
+| `VITE_WEDDING_DATETIME` | Fecha del evento en ISO con offset (default `2026-11-21T18:00:00-04:00`) |
 
 ## 2. Scripts
 
