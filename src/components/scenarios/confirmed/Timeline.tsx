@@ -68,7 +68,7 @@ function SparkleIcon({ className = "w-5 h-5" }: { className?: string }) {
 }
 
 const PROGRAMA = [
-  { hora: "2:00 p.m.", actividad: "Ceremonia", Icon: ChurchIcon },
+  { hora: "3:30 p.m.", actividad: "Ceremonia", Icon: ChurchIcon },
   { hora: "5:00 p.m.", actividad: "Cóctel de bienvenida", Icon: ChampagneIcon },
   { hora: "7:30 p.m.", actividad: "Cena", Icon: CenaIcon },
   { hora: "9:30 p.m.", actividad: "Torta", Icon: CakeIcon },
