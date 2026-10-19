@@ -56,7 +56,7 @@ const GRUPOS = [
   {
     titulo: "Restricciones",
     Icon: WarningIcon,
-    items: ["Evento solo para adultos, salvo indicación", "No se permite ingresar con mascotas", "Estacionamiento disponible con valet parking"],
+    items: ["Evento solo para adultos, salvo indicación", "No se permite ingresar con mascotas", "Estacionamiento disponible"],
   },
 ];
 

@@ -4,7 +4,7 @@ import { OliveDivider } from "@/components/shared/OliveDivider";
 
 const REGLAS = [
   "Es una celebración solo para adultos; agradecemos dejar a los peques en casa, salvo indicación contraria en tu invitación.",
-  "Por favor confirma tu asistencia antes del 1 de octubre para poder organizar mesas y menú.",
+  "Por favor confirma tu asistencia antes del 8 de noviembre para poder organizar mesas y menú.",
 ];
 
 export function CodeOfConduct() {

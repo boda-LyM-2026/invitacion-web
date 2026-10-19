@@ -33,7 +33,7 @@ export function GiftsSection() {
                 Lista de regalos físicos
               </h3>
               <p className="mt-3 font-body text-sm leading-relaxed text-ink-light">
-                Escanea este QR para ver la lista de regalos que hemos seleccionado. 
+                Escanea este QR para solicitar la lista de regalos que hemos seleccionado. 
                 Podrás elegir el que prefieras desde ahí.
               </p>
               <div className="mt-6 rounded-2xl overflow-hidden shadow-soft border border-pistachio-200/50 bg-white">
@@ -47,11 +47,12 @@ export function GiftsSection() {
                 />
               </div>
               <a
-                href="/images/regalos/QR-regalos-fisico.jpeg"
-                download="QR-regalos-fisicos.jpg"
+                href="https://wa.link/ukrzab"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="btn-ghost mt-4 inline-flex"
               >
-                Descargar QR
+                Solicitar lista
               </a>
             </div>
           </Reveal>

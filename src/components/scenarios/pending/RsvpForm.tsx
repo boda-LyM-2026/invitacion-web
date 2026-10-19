@@ -176,7 +176,7 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
                   transition={{ delay: i * 0.1 }}
                 >
                   <label className="mb-2 block font-body text-xs uppercase tracking-widest2 text-ink-muted">
-                    Invitado {i + 1}
+                    Acompañante {i + 1}
                   </label>
                   <input
                     type="text"

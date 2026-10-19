@@ -20,6 +20,9 @@ vite.config.d.ts
 *.orig
 *.bak
 
+# Lista de invitados: solo local, nunca se versiona
+lstInv/
+
 # NOTA: supabase/schema.sql sí se versiona a propósito. Mientras estuvo en
 # .gitignore, git lo borraba del disco en cada cambio de rama y se perdía.
 # No contiene datos ni secretos: solo el DDL y las funciones de la app.
