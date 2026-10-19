@@ -29,8 +29,9 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
 
   const acompanantes = form.acompanantes ?? [];
   /**
-   * Los que ya tienen id existen en base de datos: son inmutables. El titular
-   * solo puede agregar nombres nuevos, nunca reemplazar los registrados.
+   * Los que tienen id ya existen en base de datos: se muestran con su chip
+   * "Registrado" pero el admin puede editar el nombre (incluidos los slots
+   * vacíos que vienen de la importación). Al guardar se actualizan.
    */
   const registrados = acompanantes.filter((a) => Boolean(a.id));
   const nuevos = acompanantes.filter((a) => !a.id);
@@ -40,11 +41,11 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
   const excedeLimite = llenados > maxAcompanantes;
 
   const normalizar = (s: string) => s.trim().toLowerCase();
-  const nombresRegistrados = new Set(registrados.map((a) => normalizar(a.nombre_completo)));
-  /** No se admite un nombre duplicado ni uno que ya esté en base de datos. */
-  const duplicado = nuevos.some(
-    (a) => a.nombre_completo.trim() && nombresRegistrados.has(normalizar(a.nombre_completo)),
-  );
+  /** No se admite un nombre repetido dentro de la lista, sea nuevo o registrado. */
+  const nombresLlenados = acompanantes
+    .filter((a) => a.nombre_completo.trim())
+    .map((a) => normalizar(a.nombre_completo));
+  const duplicado = new Set(nombresLlenados).size !== nombresLlenados.length;
 
   function actualizarAcompanantes(indice: number, cambios: Partial<AcompananteInput>) {
     setForm({
@@ -66,7 +67,8 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
     setGuardando(true);
     await onGuardar({
       ...form,
-      // Solo se envían los nuevos: los registrados no se tocan (ver hook).
+      // Registrados (con id) y nuevos viajan juntos: el hook inserta los
+      // nuevos y actualiza el nombre de los registrados.
       acompanantes: acompanantes.filter((a) => a.nombre_completo.trim()),
     });
     setGuardando(false);
@@ -205,19 +207,28 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
             </div>
 
             <div className="space-y-2">
-              {registrados.map((acompanante) => (
-                <div
-                  key={acompanante.id}
-                  className="flex items-center gap-2 rounded-lg border border-pistachio-200/60 bg-pistachio-50/70 px-3 py-2.5"
-                >
-                  <span className="min-w-0 flex-1 truncate font-body text-sm text-ink">
-                    {acompanante.nombre_completo}
-                  </span>
-                  <span className="shrink-0 rounded-full bg-olive/10 px-2 py-0.5 font-body text-[10px] uppercase tracking-wider text-olive-900">
-                    Registrado
-                  </span>
-                </div>
-              ))}
+              {registrados.map((acompanante) => {
+                const indice = acompanantes.indexOf(acompanante);
+                return (
+                  <div
+                    key={acompanante.id}
+                    className="flex items-center gap-2 rounded-lg border border-pistachio-200/60 bg-pistachio-50/70 px-3 py-2.5"
+                  >
+                    <input
+                      value={acompanante.nombre_completo}
+                      onChange={(e) =>
+                        actualizarAcompanantes(indice, { nombre_completo: e.target.value })
+                      }
+                      placeholder="Nombre del acompañante"
+                      aria-label={`Acompañante registrado ${indice + 1}`}
+                      className="min-w-0 flex-1 bg-transparent font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none"
+                    />
+                    <span className="shrink-0 rounded-full bg-olive/10 px-2 py-0.5 font-body text-[10px] uppercase tracking-wider text-olive-900">
+                      Registrado
+                    </span>
+                  </div>
+                );
+              })}
 
               <AnimatePresence initial={false}>
                 {nuevos.map((acompanante) => {
@@ -261,12 +272,6 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
               )}
             </div>
 
-            {registrados.length > 0 && (
-              <p className="mt-4 font-body text-xs text-ink-muted">
-                Los registrados no se pueden modificar ni eliminar. Solo puedes añadir los que falten.
-              </p>
-            )}
-
             <button
               type="button"
               onClick={agregarAcompanante}
@@ -283,7 +288,7 @@ export function GuestFormModal({ grupoInicial, mesas, onCancelar, onGuardar }: G
             )}
             {duplicado && (
               <p className="mt-2 font-body text-xs text-red-700">
-                Ese nombre ya está registrado como acompañante.
+                Hay un nombre repetido en la lista de acompañantes.
               </p>
             )}
           </div>

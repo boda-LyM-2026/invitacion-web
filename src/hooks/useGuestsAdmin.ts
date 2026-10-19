@@ -12,7 +12,7 @@ export interface AcompananteInput {
   nombre_completo: string;
   /**
    * Id del acompañante ya registrado en base de datos. Si viene informado, el
-   * registro es inmutable: se muestra tal cual y no se puede reemplazar.
+   * registro existe: al guardar se actualiza su nombre.
    */
   id?: string;
 }
@@ -138,24 +138,36 @@ export function useGuestsAdmin() {
   }, [cargar]);
 
   /**
-   * Inserta unicamente los acompanantes que aun no existen en base de datos.
-   * Los que ya tienen id no se tocan: quedan bloqueados y solo se pueden
-   * agregar nombres nuevos, nunca reemplazar los existentes.
+   * Escribe los acompanantes de una vez: inserta los que aun no existen en
+   * base de datos y actualiza el nombre de los que ya tienen id, de modo que
+   * el admin puede corregir nombres registrados (incluidos los slots con
+   * nombre NULL que vienen de la importacion).
    */
-  async function agregarAcompanantes(
+  async function guardarAcompanantes(
     grupoId: string,
     lista: AcompananteInput[] | undefined,
   ): Promise<string | null> {
-    const nuevos = limpiarAcompanantes(lista).filter((a) => !a.id);
-    if (nuevos.length === 0) return null;
-    const { error } = await supabase.from("acompanantes").insert(
-      nuevos.map((a) => ({
-        grupo_id: grupoId,
-        nombre_completo: a.nombre_completo,
-        confirmado: null,
-      })),
-    );
-    return error ? "No se pudieron guardar los acompanantes." : null;
+    const limpios = limpiarAcompanantes(lista);
+    const nuevos = limpios.filter((a) => !a.id);
+    if (nuevos.length > 0) {
+      const { error } = await supabase.from("acompanantes").insert(
+        nuevos.map((a) => ({
+          grupo_id: grupoId,
+          nombre_completo: a.nombre_completo,
+          confirmado: null,
+        })),
+      );
+      if (error) return "No se pudieron guardar los acompanantes.";
+    }
+    for (const a of limpios) {
+      if (!a.id) continue;
+      const { error } = await supabase
+        .from("acompanantes")
+        .update({ nombre_completo: a.nombre_completo })
+        .eq("id", a.id);
+      if (error) return "No se pudieron guardar los acompanantes.";
+    }
+    return null;
   }
 
   async function crear(input: NuevoGrupoInput): Promise<string | null> {
@@ -190,7 +202,7 @@ export function useGuestsAdmin() {
       .select("id")
       .single();
     if (error) return "No se pudo crear el grupo.";
-    const errAcompanantes = await agregarAcompanantes(data.id, acompanantes);
+    const errAcompanantes = await guardarAcompanantes(data.id, acompanantes);
     await cargar();
     return errAcompanantes;
   }
@@ -208,7 +220,7 @@ export function useGuestsAdmin() {
             estado: cambios.estado ?? g.estado,
             acompanantes: acompanantes
               ? limpios.map((a) => ({
-                  id: crypto.randomUUID(),
+                  id: a.id ?? crypto.randomUUID(),
                   grupo_id: g.id,
                   nombre_completo: a.nombre_completo,
                   confirmado: null,
@@ -223,7 +235,7 @@ export function useGuestsAdmin() {
       const { error } = await supabase.from("grupos_invitacion").update(resto).eq("id", id);
       if (error) return "No se pudo actualizar el grupo.";
     }
-    const errAcompanantes = await agregarAcompanantes(id, acompanantes);
+    const errAcompanantes = await guardarAcompanantes(id, acompanantes);
     await cargar();
     return errAcompanantes;
   }
