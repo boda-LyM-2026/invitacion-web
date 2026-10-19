@@ -71,16 +71,27 @@ export default function InvitationPage() {
   if (loading) return <EstadoCarga />;
   if (error || !grupo) return <EstadoError mensaje={error ?? "Invitación no encontrada"} />;
 
-  // Intro cinemática solo para escenario "pending"
+  // Intro cinemática solo para escenario "pending".
+  // AudioPlayer va montado TAMBIÉN durante la intro y en posición estable
+  // (primer hijo del fragmento en todas las ramas): así existe el listener
+  // de "iniciar-musica-boda" en el momento del clic, y la misma instancia
+  // (con la música sonando) sobrevive al cambio de rama al terminar la intro.
   if (grupo.estado === "pending" && !introVisto) {
-    return <IntroSequence onFinished={() => setIntroVisto(true)} />;
+    return (
+      <>
+        {/* invisible: sigue montado (escucha "iniciar-musica-boda" y mantiene
+            la música viva tras la intro) pero no se ve hasta el contenido. */}
+        <AudioPlayer className="invisible" />
+        <IntroSequence onFinished={() => setIntroVisto(true)} />
+      </>
+    );
   }
 
   if (grupo.estado === "declined") {
     return (
       <>
-        <FilmGrain />
         <AudioPlayer />
+        <FilmGrain />
         <AnimatePresence mode="wait">
           <motion.main
             key="declined"
@@ -101,9 +112,9 @@ export default function InvitationPage() {
   if (grupo.estado === "confirmed") {
     return (
       <>
+        <AudioPlayer />
         <FilmGrain />
         <ScrollProgress />
-        <AudioPlayer />
         <AnimatePresence mode="wait">
           <motion.main
             key="confirmed"
@@ -129,9 +140,9 @@ export default function InvitationPage() {
   // Escenario A — pending
   return (
     <>
+      <AudioPlayer />
       <FilmGrain />
       <ScrollProgress />
-      <AudioPlayer />
       <AnimatePresence mode="wait">
         <motion.main
           key="pending"

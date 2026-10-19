@@ -586,39 +586,18 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
     overlayRef.current?.focus();
   }, []);
 
-  function handleSkip() {
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    if (esperandoClickRevelacion) {
-      window.dispatchEvent(new CustomEvent("iniciar-musica-boda"));
-      setSaliendo(true);
-      return;
-    }
-    if (ORDEN.indexOf(faseRef.current) >= ORDEN.length - 1) return;
-    setSaliendo(true);
-  }
-
   const showEnvelope = fase !== "oscuridad" && fase !== "salida";
 
   return (
     <motion.div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center overflow-hidden outline-none"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden outline-none"
       style={{
         background: "linear-gradient(180deg, #0a0a0a 0%, #17150f 38%, #241f12 100%)",
       }}
       role="region"
       aria-label="Introducción a la invitación"
       tabIndex={-1}
-      onClick={handleSkip}
-      onKeyDown={(e) => {
-        if (e.key === "Escape" || e.key === " " || e.key === "Enter") {
-          e.preventDefault();
-          handleSkip();
-        }
-      }}
       initial={{ opacity: 1 }}
       animate={saliendo ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: sec(DURACIONES.salida), ease: "easeInOut" }}
@@ -773,18 +752,11 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
 
             {/* Carta (detrás de solapas, se eleva al abrir) */}
             <motion.div
-              className={`absolute inset-x-4 top-2 z-[5] h-44 overflow-hidden rounded-[3px] sm:h-48 ${esperandoClickRevelacion ? "cursor-pointer" : ""}`}
+              className="absolute inset-x-4 top-2 z-[5] h-44 overflow-hidden rounded-[3px] sm:h-48"
               style={{
                 backfaceVisibility: "hidden",
                 boxShadow:
                   "0 6px 22px rgba(0,0,0,0.28), inset 0 0 46px rgba(120,95,40,0.10)",
-              }}
-              onClick={() => {
-                if (esperandoClickRevelacion) {
-                  window.dispatchEvent(new CustomEvent("iniciar-musica-boda"));
-                  setEsperandoClickRevelacion(false);
-                  setSaliendo(true);
-                }
               }}
               animate={
                 fase === "revelacion" || esperandoClickRevelacion
@@ -1075,6 +1047,10 @@ export function IntroSequence({ onFinished, novios = NOMBRE_NOVIOS }: IntroSeque
             <motion.button
               onClick={(e) => {
                 e.stopPropagation();
+                if (timeoutRef.current) {
+                  window.clearTimeout(timeoutRef.current);
+                  timeoutRef.current = null;
+                }
                 window.dispatchEvent(new CustomEvent("iniciar-musica-boda"));
                 setEsperandoClickRevelacion(false);
                 setSaliendo(true);

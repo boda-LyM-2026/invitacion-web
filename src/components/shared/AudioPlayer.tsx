@@ -71,7 +71,7 @@ export function AudioPlayer({ src = "/audio/background-music.mp3", className = "
 
 
         {/* Control buttons */}
-        <div className="flex items-center gap-1 rounded-full bg-cinematic-dark/80 p-1.5 shadow-cinematic backdrop-blur-md">
+        <div className="flex items-center gap-1 rounded-full bg-cinematic-dark/80 p-0.3 shadow-cinematic backdrop-blur-md">
           {/* Play/Pause */}
           <motion.button
             onClick={togglePlay}
