@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGrupoInvitacion } from "@/hooks/useGrupoInvitacion";
@@ -67,6 +67,14 @@ export default function InvitationPage() {
   const { token } = useParams<{ token: string }>();
   const { grupo, loading, error, refetch } = useGrupoInvitacion(token);
   const [introVisto, setIntroVisto] = useState(false);
+
+  // Barra de scroll nativa oculta durante la invitación (el scroll sigue
+  // funcionando); se restaura al salir de la ruta.
+  useEffect(() => {
+    const raiz = document.documentElement;
+    raiz.classList.add("scrollbar-oculta");
+    return () => raiz.classList.remove("scrollbar-oculta");
+  }, []);
 
   if (loading) return <EstadoCarga />;
   if (error || !grupo) return <EstadoError mensaje={error ?? "Invitación no encontrada"} />;
