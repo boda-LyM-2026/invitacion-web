@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { OliveDivider } from "./OliveDivider";
 import { NOMBRE_NOVIOS, FECHA_BODA_TEXTO } from "@/config/wedding";
@@ -7,11 +7,20 @@ interface HeroProps {
   nombreInvitado?: string;
 }
 
-const FOTOS_NOVIOS = [
-  "/images/novios/novios-1.jpg",
-  "/images/novios/novios-2.jpg",
-  "/images/novios/novios-3.jpg",
+interface FotoNovios {
+  base: string;
+  anchos: number[];
+}
+
+const FOTOS_NOVIOS: FotoNovios[] = [
+  { base: "/images/novios/novios-1", anchos: [640, 960, 1280] },
+  { base: "/images/novios/novios-2", anchos: [640, 960, 1280, 1920] },
+  { base: "/images/novios/novios-3", anchos: [640, 960, 1280] },
 ];
+
+function construirSrcSet({ base, anchos }: FotoNovios): string {
+  return anchos.map((ancho) => `${base}-${ancho}.webp ${ancho}w`).join(", ");
+}
 
 /** Milisegundos que cada foto permanece visible antes de empezar a desvanecerse. */
 const DURACION_FOTO_MS = 5000;
@@ -25,11 +34,27 @@ export function Hero({ nombreInvitado }: HeroProps) {
   const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
 
   const [fotoActiva, setFotoActiva] = useState(0);
+  const [primeraLista, setPrimeraLista] = useState(false);
+  const [motionReducido, setMotionReducido] = useState(false);
+  const cargadas = useRef<Set<number>>(new Set());
+
+  const marcarCargada = useCallback((indice: number) => {
+    if (cargadas.current.has(indice)) return;
+    cargadas.current.add(indice);
+    if (indice === 0) setPrimeraLista(true);
+  }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const consulta = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (consulta.matches) {
+      setMotionReducido(true);
+      return;
+    }
     const intervalo = window.setInterval(() => {
-      setFotoActiva((prev) => (prev + 1) % FOTOS_NOVIOS.length);
+      setFotoActiva((prev) => {
+        const siguiente = (prev + 1) % FOTOS_NOVIOS.length;
+        return cargadas.current.has(siguiente) ? siguiente : prev;
+      });
     }, DURACION_FOTO_MS);
     return () => window.clearInterval(intervalo);
   }, []);
@@ -38,23 +63,31 @@ export function Hero({ nombreInvitado }: HeroProps) {
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-cinematic-black text-alabaster">
       {/* Parallax background image */}
       <motion.div className="absolute inset-0" style={{ y, scale }}>
-        {FOTOS_NOVIOS.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt={i === 0 ? "Lenan y Mauricio" : ""}
-            aria-hidden={i !== 0}
-            width={1200}
-            height={1800}
-            className="absolute inset-0 h-full w-full object-cover transition-opacity ease-in-out"
-            style={{
-              opacity: i === fotoActiva ? 1 : 0,
-              transitionDuration: `${DURACION_FADE_MS}ms`,
-            }}
-            loading="eager"
-            fetchPriority={i === 0 ? "high" : "auto"}
-          />
-        ))}
+        {FOTOS_NOVIOS.map((foto, i) => {
+          if (i > 0 && (!primeraLista || motionReducido)) return null;
+          return (
+            <img
+              key={foto.base}
+              ref={(el) => {
+                if (el?.complete) marcarCargada(i);
+              }}
+              src={`${foto.base}-960.webp`}
+              srcSet={construirSrcSet(foto)}
+              sizes="100vw"
+              alt={i === 0 ? "Lenan y Mauricio" : ""}
+              aria-hidden={i !== 0}
+              decoding="async"
+              fetchPriority={i === 0 ? "high" : "low"}
+              onLoad={() => marcarCargada(i)}
+              onError={() => marcarCargada(i)}
+              className="absolute inset-0 h-full w-full object-cover transition-opacity ease-in-out"
+              style={{
+                opacity: i === fotoActiva && primeraLista ? 1 : 0,
+                transitionDuration: `${DURACION_FADE_MS}ms`,
+              }}
+            />
+          );
+        })}
       </motion.div>
 
       {/* Cinematic overlays */}
