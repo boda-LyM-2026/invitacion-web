@@ -24,7 +24,7 @@ function personasConfirmadas(g: GrupoInvitacion): number {
 }
 
 const MENSAJE_WHATSAPP =
-  "¡Hola familia y amigos! Queremos compartir con ustedes uno de los días más felices de nuestra vida. Son parte de nuestra historia y nos haría muy felices que nos acompañen a celebrar nuestro matrimonio. Confirmen su asistencia aquí 👉";
+  "¡Hola familia y amigos! Queremos compartir con ustedes uno de los días más felices de nuestra vida. Son parte de nuestra historia y nos haría muy felices que nos acompañen a celebrar nuestro matrimonio. Confirmen su asistencia aquí";
 
 function enlaceWhatsApp(g: GrupoInvitacion): string {
   const url = enlaceInvitacion(g.access_token);
