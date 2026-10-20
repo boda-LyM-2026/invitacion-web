@@ -1,7 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { BADGES_ESTADO, ETIQUETAS_ESTADO, ETIQUETAS_CATEGORIA } from "@/config/catalogos";
-import { NOMBRE_NOVIOS } from "@/config/wedding";
 import type { GrupoInvitacion } from "@/types/domain";
 
 interface GuestsTableProps {
@@ -24,11 +23,12 @@ function personasConfirmadas(g: GrupoInvitacion): number {
   return g.estado === "confirmed" ? g.acompanantes.length + 1 : 0;
 }
 
+const MENSAJE_WHATSAPP =
+  "¡Hola familia y amigos! Queremos compartir con ustedes uno de los días más felices de nuestra vida. Son parte de nuestra historia y nos haría muy felices que nos acompañen a celebrar nuestro matrimonio. Confirmen su asistencia aquí 👉";
+
 function enlaceWhatsApp(g: GrupoInvitacion): string {
   const url = enlaceInvitacion(g.access_token);
-  const destinatario = g.nombre_grupo || g.invitado_principal;
-  const texto = `Hola ${destinatario}, te invitamos a la boda de ${NOMBRE_NOVIOS}. Confirma tu asistencia aquí: ${url}`;
-  return `https://wa.me/?text=${encodeURIComponent(texto)}`;
+  return `https://wa.me/?text=${encodeURIComponent(`${MENSAJE_WHATSAPP} ${url}`)}`;
 }
 
 function nombreMesa(g: GrupoInvitacion): string {
