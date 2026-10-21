@@ -138,17 +138,18 @@ export function Hero({ nombreInvitado }: HeroProps) {
           Nos casamos
         </motion.p>
 
-        {/* Main title with letter-by-letter animation */}
-        <div className="overflow-hidden">
-          <motion.h1
-            className="font-display text-6xl font-light italic leading-tight sm:text-7xl md:text-8xl"
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            transition={{ delay: 0.9, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {NOMBRE_NOVIOS}
-          </motion.h1>
-        </div>
+        {/* Main title: sin overflow-hidden — en mobile el slide recortaba
+            las letras a mitad de camino (los glifos itálicos exceden la
+            caja de línea). Nace invisible y aparece al llegar a su
+            posición. */}
+        <motion.h1
+          className="font-display text-6xl font-light italic leading-tight sm:text-7xl md:text-8xl"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 2.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {NOMBRE_NOVIOS}
+        </motion.h1>
 
         {/* Date */}
         <motion.p
