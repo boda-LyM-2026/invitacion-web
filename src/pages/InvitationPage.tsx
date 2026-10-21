@@ -132,7 +132,7 @@ export default function InvitationPage() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Hero nombreInvitado={grupo.nombre_grupo || grupo.invitado_principal} />
+            <Hero nombreInvitado={grupo.nombre_grupo} />
             <Countdown />
             <LocationSection />
             <Timeline />
@@ -160,7 +160,7 @@ export default function InvitationPage() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <Hero nombreInvitado={grupo.invitado_principal} />
+          <Hero nombreInvitado={grupo.nombre_grupo} />
           <OurStory />
             <FormalInvitation />
             <DressCode />
