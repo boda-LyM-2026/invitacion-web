@@ -26,30 +26,28 @@ export function CodeOfConduct() {
           <OliveDivider className="text-pistachio-400" />
         </Reveal>
 
-        <Reveal delay={0.2} variant="fade-up">
-          <ul className="mx-auto mt-8 max-w-md space-y-4">
-            {REGLAS.map((regla, i) => (
-              <motion.li
-                key={regla}
-                className="flex items-start gap-4 rounded-2xl bg-white/80 p-4 shadow-glass transition-all duration-500 hover:shadow-glow-olive"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 + i * 0.15, duration: 0.8 }}
+        <ul className="mx-auto mt-8 max-w-md space-y-4">
+          {REGLAS.map((regla, i) => (
+            <motion.li
+              key={regla}
+              className="flex items-start gap-4 rounded-2xl bg-white/80 p-4 shadow-glass transition-shadow duration-500 hover:shadow-glow-olive"
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 1, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <motion.div
+                className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-olive text-alabaster"
+                whileHover={{ scale: 1.1 }}
               >
-                <motion.div
-                  className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-olive text-alabaster"
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <span className="font-display text-sm">{i + 1}</span>
-                </motion.div>
-                <span className="font-body text-sm leading-relaxed text-ink-light">
-                  {regla}
-                </span>
-              </motion.li>
-            ))}
-          </ul>
-        </Reveal>
+                <span className="font-display text-sm">{i + 1}</span>
+              </motion.div>
+              <span className="font-body text-sm leading-relaxed text-ink-light">
+                {regla}
+              </span>
+            </motion.li>
+          ))}
+        </ul>
       </div>
     </section>
   );

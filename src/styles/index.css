@@ -5,6 +5,11 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Las variantes fade-left/right de Reveal desplazan contenido ±40px
+       antes de animar; sin este clip el documento queda con scroll
+       horizontal y en móvil se ve una franja blanca al deslizar. */
+    overflow-x: hidden; /* fallback: Safari < 16 no soporta clip */
+    overflow-x: clip;
   }
 
   body {
@@ -39,7 +44,9 @@
   }
 
   .section-cinematic {
-    @apply relative w-full py-24;
+    /* overflow-x-clip: contiene las traducciones horizontales de Reveal
+       (fade-left/fade-right) sin crear scroll container vertical. */
+    @apply relative w-full overflow-x-clip py-24;
   }
 
   .section-content {
