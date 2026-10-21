@@ -16,7 +16,7 @@ export function Countdown() {
   const cuenta = useCountdown(FECHA_BODA_ISO);
 
   return (
-    <section className="section-cinematic relative overflow-hidden">
+    <section id="countdown" className="section-cinematic relative overflow-hidden">
       {/* Background image */}
       <div
         className="absolute inset-0 bg-fixed bg-cover bg-center"
