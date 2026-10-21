@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGrupoInvitacion } from "@/hooks/useGrupoInvitacion";
+import type { EstadoInvitacion } from "@/types/domain";
 import { IntroSequence } from "@/components/intro/IntroSequence";
 import { Hero } from "@/components/shared/Hero";
 import { Footer } from "@/components/shared/Footer";
@@ -68,6 +69,28 @@ export default function InvitationPage() {
   const { token } = useParams<{ token: string }>();
   const { grupo, loading, error, refetch } = useGrupoInvitacion(token);
   const [introVisto, setIntroVisto] = useState(false);
+
+  // Tras enviar el RSVP, el refetch cambia el escenario pero el navegador
+  // conserva la posición de scroll (donde estaba el formulario). Este efecto
+  // lleva al invitado a la primera sección del nuevo escenario: Countdown en
+  // confirmed (Hero no aplica como destino) y el agradecimiento en declined.
+  const estadoRenderizadoRef = useRef<EstadoInvitacion | null>(null);
+  const grupoIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (loading || !grupo) return;
+    const estadoPrevio = estadoRenderizadoRef.current;
+    const cambioDeGrupo = grupoIdRef.current !== grupo.id;
+    estadoRenderizadoRef.current = grupo.estado;
+    grupoIdRef.current = grupo.id;
+    if (cambioDeGrupo || !estadoPrevio || estadoPrevio === grupo.estado) return;
+
+    if (grupo.estado === "confirmed") {
+      document.getElementById("countdown")?.scrollIntoView({ behavior: "auto", block: "start" });
+    } else if (grupo.estado === "declined") {
+      document.getElementById("gracias")?.scrollIntoView({ behavior: "auto", block: "start" });
+    }
+  }, [loading, grupo]);
 
   // Barra de scroll nativa oculta durante la invitación (el scroll sigue
   // funcionando); se restaura al salir de la ruta.

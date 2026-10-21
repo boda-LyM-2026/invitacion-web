@@ -8,7 +8,10 @@ interface ThankYouScreenProps {
 
 export function ThankYouScreen({ nombreInvitado }: ThankYouScreenProps) {
   return (
-    <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-6 text-center">
+    <section
+      id="gracias"
+      className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-6 text-center"
+    >
       {/* Background image */}
       <div
         className="absolute inset-0 bg-fixed bg-cover bg-center"
