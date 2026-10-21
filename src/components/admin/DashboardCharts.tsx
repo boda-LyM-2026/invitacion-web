@@ -48,6 +48,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
   }));
 
   const porEstado = charts.por_estado.map((e) => ({
+    estado: e.estado,
     name: ETIQUETAS_ESTADO_GRAFICO[e.estado] ?? e.estado,
     value: e.grupos,
   }));
@@ -102,10 +103,13 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
               paddingAngle={2}
             >
               {porEstado.map((entry) => (
-                <Cell key={entry.name} fill={COLORES_ESTADO[entry.name]} />
+                <Cell key={entry.estado} fill={COLORES_ESTADO[entry.estado]} />
               ))}
             </Pie>
-            <Legend wrapperStyle={{ color: "#6b6b6b", fontSize: "12px" }} />
+            <Legend
+              formatter={(value: string) => <span className="text-olive-900">{value}</span>}
+              wrapperStyle={{ fontSize: "12px" }}
+            />
             <Tooltip
               contentStyle={{
                 backgroundColor: "#fff",
