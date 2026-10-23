@@ -39,6 +39,33 @@ export function useRsvp(): UseRsvpResult {
     setSubmitting(false);
 
     if (rpcError) {
+      const message = rpcError.message ?? "";
+
+      if (message.includes("El mensaje es demasiado largo")) {
+        setError("El mensaje es demasiado largo. Debe tener un máximo de 500 caracteres.");
+        return false;
+      }
+
+      if (message.includes("Demasiados intentos")) {
+        setError("Demasiados intentos. Intenta de nuevo más tarde.");
+        return false;
+      }
+
+      if (message.includes("Excede el límite de personas del grupo")) {
+        setError("Excede el límite de personas del grupo.");
+        return false;
+      }
+
+      if (message.includes("Invitación no encontrada")) {
+        setError("La invitación no es válida o ya fue utilizada.");
+        return false;
+      }
+
+      if (message.includes("Estado de RSVP inválido") || message.includes("Acompañantes inválidos")) {
+        setError("Hay un error con los datos enviados. Revisa el formulario e inténtalo de nuevo.");
+        return false;
+      }
+
       setError("No pudimos guardar tu respuesta. Verifica tu conexión e inténtalo de nuevo.");
       return false;
     }
