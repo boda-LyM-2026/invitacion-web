@@ -206,9 +206,13 @@ export function RsvpForm({ grupo, onSuccess }: RsvpFormProps) {
                 value={mensaje}
                 onChange={(e) => setMensaje(e.target.value)}
                 rows={3}
+                maxLength={500}
                 className="w-full rounded-xl border border-pistachio-200 bg-white/90 px-4 py-3 font-body text-sm text-ink placeholder:text-ink-muted focus:border-olive focus:outline-none focus:ring-2 focus:ring-olive/20 transition-all duration-300"
                 placeholder="Déjales unas palabras..."
               />
+              <p className="mt-1 text-right font-body text-xs text-ink-muted">
+                {mensaje.length}/500
+              </p>
 
               {error && (
                 <p className="mt-4 text-center font-body text-sm text-olive-700">{error}</p>
