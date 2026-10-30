@@ -161,13 +161,13 @@ export function Recommendations({ grupo }: RecommendationsProps = {}) {
                 <div className="mb-4 flex items-center gap-3">
                   <TicketIcon className="h-6 w-6 text-olive" />
                   <h3 className="font-display text-xl font-light text-olive-900">
-                    Tus invitados
+                    Tus tickets
                   </h3>
                 </div>
                 <div className="mt-4 space-y-3">
                   <p className="font-body text-sm text-ink-light">
                     Tienes <span className="font-medium text-olive-900">{grupo.limite_personas}</span>{" "}
-                    {grupo.limite_personas === 1 ? "invitado" : "invitados"} asignados a tu grupo.
+                    {grupo.limite_personas === 1 ? "ticket" : "tickets"} asignados a tu grupo.
                   </p>
                   <div className="space-y-2">
                     <p className="font-body text-xs uppercase tracking-widest2 text-olive/70">Lista</p>
