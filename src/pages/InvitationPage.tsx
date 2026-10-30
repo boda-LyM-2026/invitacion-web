@@ -161,7 +161,7 @@ export default function InvitationPage() {
             <Timeline />
             <TableAssignment mesa={grupo.mesa} />
             <GiftsSection />
-            <Recommendations />
+            <Recommendations grupo={grupo} />
             <Footer />
           </motion.main>
         </AnimatePresence>

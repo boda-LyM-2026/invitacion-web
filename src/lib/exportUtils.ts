@@ -4,7 +4,14 @@ import autoTable from "jspdf-autotable";
 import { ETIQUETAS_ESTADO } from "@/config/catalogos";
 import type { GrupoInvitacion } from "@/types/domain";
 
-interface FilaExport {
+interface FilaExportLista {
+  Grupo: string;
+  "Invitado principal": string;
+  Acompañantes: string;
+  "Total personas": number;
+}
+
+interface FilaExportCompleta {
   Grupo: string;
   "Invitado principal": string;
   Estado: string;
@@ -17,7 +24,23 @@ interface FilaExport {
   Enlace: string;
 }
 
-function aFilas(grupos: GrupoInvitacion[]): FilaExport[] {
+function aFilasLista(grupos: GrupoInvitacion[]): FilaExportLista[] {
+  return grupos.map((g) => {
+    const acompañantes = g.acompanantes
+      .map((a) => a.nombre_completo)
+      .filter((nombre): nombre is string => Boolean(nombre && nombre.trim()))
+      .join(", ");
+
+    return {
+      Grupo: g.nombre_grupo,
+      "Invitado principal": g.invitado_principal,
+      Acompañantes: acompañantes,
+      "Total personas": g.limite_personas,
+    };
+  });
+}
+
+function aFilas(grupos: GrupoInvitacion[]): FilaExportCompleta[] {
   const origen = window.location.origin;
   return grupos.map((g) => ({
     Grupo: g.nombre_grupo,
@@ -56,17 +79,20 @@ export function exportarCsv(grupos: GrupoInvitacion[], nombreArchivo = "invitado
 }
 
 export function exportarPdf(grupos: GrupoInvitacion[], nombreArchivo = "invitados-lenan-mauricio.pdf") {
-  const doc = new jsPDF({ orientation: "landscape" });
+  const doc = new jsPDF({ orientation: "portrait" });
   doc.setFontSize(16);
   doc.text("Lenan & Mauricio — Lista de invitados", 14, 16);
 
-  const filas = aFilas(grupos);
+  const filas = aFilasLista(grupos);
   autoTable(doc, {
     startY: 22,
     head: [Object.keys(filas[0] ?? {})],
     body: filas.map((f) => Object.values(f)),
     styles: { fontSize: 8, cellPadding: 3 },
     headStyles: { fillColor: [97, 110, 77] },
+    columnStyles: {
+      Acompañantes: { cellWidth: "auto" },
+    },
   });
 
   doc.save(nombreArchivo);

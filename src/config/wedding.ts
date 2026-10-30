@@ -13,7 +13,7 @@ export const LUGAR_BODA = "Salón de Eventos Ensueño";
 
 export const LUGAR_BODA_COMPLETO = "Salón de Eventos Ensueño, Tiquipaya, Cochabamba";
 
-export const LUGAR_BODA_MAPS = "https://maps.app.goo.gl/KKBNhSJ2pUvXe4Ae9";
+export const LUGAR_BODA_MAPS = "https://maps.app.goo.gl/weVU9Nyu9AjJ2zEv9";
 
 /** ISO con offset usado por el countdown; se puede sobreescribir vía env. */
 export const FECHA_BODA_ISO =

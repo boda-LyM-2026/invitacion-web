@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Reveal } from "@/components/shared/Reveal";
 import { OliveDivider } from "@/components/shared/OliveDivider";
+import type { GrupoInvitacion } from "@/types/domain";
 
 function ShirtIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
@@ -36,6 +37,17 @@ function WarningIcon({ className = "w-6 h-6" }: { className?: string }) {
   );
 }
 
+function TicketIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+      <path d="M13 5v2" />
+      <path d="M13 17v2" />
+      <path d="M13 11v2" />
+    </svg>
+  );
+}
+
 const GRUPOS = [
   {
     titulo: "DRESS CODE",
@@ -60,7 +72,11 @@ const GRUPOS = [
   },
 ];
 
-export function Recommendations() {
+interface RecommendationsProps {
+  grupo?: GrupoInvitacion;
+}
+
+export function Recommendations({ grupo }: RecommendationsProps = {}) {
   return (
     <section className="section-cinematic relative overflow-hidden">
       {/* Background image */}
@@ -79,7 +95,7 @@ export function Recommendations() {
           <OliveDivider className="text-pistachio-400" />
         </Reveal>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-3">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {GRUPOS.map((grupo, i) => (
             <Reveal key={grupo.titulo} delay={i * 0.15} variant="fade-up">
               <motion.div
@@ -132,6 +148,47 @@ export function Recommendations() {
               </motion.div>
             </Reveal>
           ))}
+
+          {grupo && (
+            <Reveal delay={GRUPOS.length * 0.15} variant="fade-up">
+              <motion.div
+                className="card-surface h-full p-6"
+                whileHover={{ y: -5, boxShadow: "0 20px 60px -20px rgba(10,10,10,0.3)" }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <TicketIcon className="h-6 w-6 text-olive" />
+                  <h3 className="font-display text-xl font-light text-olive-900">
+                    Tus invitados
+                  </h3>
+                </div>
+                <div className="mt-4 space-y-3">
+                  <p className="font-body text-sm text-ink-light">
+                    Tienes <span className="font-medium text-olive-900">{grupo.limite_personas}</span>{" "}
+                    {grupo.limite_personas === 1 ? "invitado" : "invitados"} asignados a tu grupo.
+                  </p>
+                  <div className="space-y-2">
+                    <p className="font-body text-xs uppercase tracking-widest2 text-olive/70">Lista</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-3 font-body text-sm text-ink-light">
+                        <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-olive/60" />
+                        {grupo.invitado_principal}
+                      </li>
+                      {grupo.acompanantes.map((acompanante) => (
+                        <li
+                          key={acompanante.id}
+                          className="flex items-start gap-3 font-body text-sm text-ink-light"
+                        >
+                          <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-olive/60" />
+                          {acompanante.nombre_completo || "Acompañante"}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            </Reveal>
+          )}
         </div>
       </div>
     </section>
