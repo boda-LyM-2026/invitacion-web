@@ -95,7 +95,7 @@ export function Recommendations({ grupo }: RecommendationsProps = {}) {
           <OliveDivider className="text-pistachio-400" />
         </Reveal>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {GRUPOS.map((grupo, i) => (
             <Reveal key={grupo.titulo} delay={i * 0.15} variant="fade-up">
               <motion.div
@@ -148,48 +148,48 @@ export function Recommendations({ grupo }: RecommendationsProps = {}) {
               </motion.div>
             </Reveal>
           ))}
-
-          {grupo && (
-            <Reveal delay={GRUPOS.length * 0.15} variant="fade-up">
-              <motion.div
-                className="card-surface h-full p-6"
-                whileHover={{ y: -5, boxShadow: "0 20px 60px -20px rgba(10,10,10,0.3)" }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="mb-4 flex items-center gap-3">
-                  <TicketIcon className="h-6 w-6 text-olive" />
-                  <h3 className="font-display text-xl font-light text-olive-900">
-                    Tus invitados
-                  </h3>
-                </div>
-                <div className="mt-4 space-y-3">
-                  <p className="font-body text-sm text-ink-light">
-                    Tienes <span className="font-medium text-olive-900">{grupo.limite_personas}</span>{" "}
-                    {grupo.limite_personas === 1 ? "invitado" : "invitados"} asignados a tu grupo.
-                  </p>
-                  <div className="space-y-2">
-                    <p className="font-body text-xs uppercase tracking-widest2 text-olive/70">Lista</p>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-3 font-body text-sm text-ink-light">
-                        <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-olive/60" />
-                        {grupo.invitado_principal}
-                      </li>
-                      {grupo.acompanantes.map((acompanante) => (
-                        <li
-                          key={acompanante.id}
-                          className="flex items-start gap-3 font-body text-sm text-ink-light"
-                        >
-                          <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-olive/60" />
-                          {acompanante.nombre_completo || "Acompañante"}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </motion.div>
-            </Reveal>
-          )}
         </div>
+
+        {grupo && (
+          <Reveal delay={0.5} variant="fade-up" className="mt-6">
+            <motion.div
+              className="card-surface mx-auto max-w-2xl p-6"
+              whileHover={{ y: -5, boxShadow: "0 20px 60px -20px rgba(10,10,10,0.3)" }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="mb-4 flex items-center gap-3">
+                <TicketIcon className="h-6 w-6 text-olive" />
+                <h3 className="font-display text-xl font-light text-olive-900">
+                  Tus invitados
+                </h3>
+              </div>
+              <div className="mt-4 space-y-3">
+                <p className="font-body text-sm text-ink-light">
+                  Tienes <span className="font-medium text-olive-900">{grupo.limite_personas}</span>{" "}
+                  {grupo.limite_personas === 1 ? "invitado" : "invitados"} asignados a tu grupo.
+                </p>
+                <div className="space-y-2">
+                  <p className="font-body text-xs uppercase tracking-widest2 text-olive/70">Lista</p>
+                  <ul className="grid gap-2 sm:grid-cols-2">
+                    <li className="flex items-start gap-3 font-body text-sm text-ink-light">
+                      <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-olive/60" />
+                      {grupo.invitado_principal}
+                    </li>
+                    {grupo.acompanantes.map((acompanante) => (
+                      <li
+                        key={acompanante.id}
+                        className="flex items-start gap-3 font-body text-sm text-ink-light"
+                      >
+                        <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-olive/60" />
+                        {acompanante.nombre_completo || "Acompañante"}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          </Reveal>
+        )}
       </div>
     </section>
   );
