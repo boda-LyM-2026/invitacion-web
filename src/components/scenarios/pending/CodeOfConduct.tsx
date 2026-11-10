@@ -4,7 +4,7 @@ import { OliveDivider } from "@/components/shared/OliveDivider";
 
 const REGLAS = [
   "Es una celebración solo para adultos; agradecemos dejar a los peques en casa, salvo indicación contraria en tu invitación.",
-  "Por favor confirma tu asistencia antes del 8 de noviembre para poder organizar mesas y menú.",
+  "Por favor confirma tu asistencia antes del 16 de noviembre para poder organizar mesas y menú.",
 ];
 
 export function CodeOfConduct() {
@@ -48,6 +48,18 @@ export function CodeOfConduct() {
             </motion.li>
           ))}
         </ul>
+
+        <Reveal delay={0.3} variant="fade-up" className="mx-auto mt-6 max-w-md">
+          <div className="rounded-2xl border border-champagne/60 bg-champagne/30 p-5 text-center">
+            <p className="font-display text-lg font-light italic text-olive-900">
+              Tu confirmación nos ayuda a preparar todo con tiempo.
+            </p>
+            <p className="mt-2 font-body text-sm leading-relaxed text-ink-light">
+              Te agradecemos responder a la brevedad posible: cada lugar y cada detalle se reserva
+              pensando en ti.
+            </p>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
