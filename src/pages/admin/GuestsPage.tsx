@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGuestsAdmin, type NuevoGrupoInput } from "@/hooks/useGuestsAdmin";
 import { useMesasAdmin } from "@/hooks/useMesasAdmin";
@@ -7,12 +7,16 @@ import { GuestsTable } from "@/components/admin/GuestsTable";
 import { GuestFormModal } from "@/components/admin/GuestFormModal";
 import { GuestDetailModal } from "@/components/admin/GuestDetailModal";
 import { ImportGuestsModal } from "@/components/admin/ImportGuestsModal";
+import { ExportListaModal, type EstadoListaInvitados } from "@/components/admin/ExportListaModal";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { CATEGORIAS, ESTADOS } from "@/config/catalogos";
+import { CATEGORIAS, ESTADOS, ETIQUETAS_ESTADO } from "@/config/catalogos";
+import type { OrdenListaInvitados } from "@/lib/exportUtils";
 import type { GrupoInvitacion } from "@/types/domain";
 
 const OPCIONES_CATEGORIA = ["todas", ...CATEGORIAS] as const;
 const OPCIONES_ESTADO = ["todos", ...ESTADOS] as const;
+const CLASE_OPCION_EXPORTAR =
+  "w-full rounded-lg px-3 py-2 text-left font-body text-sm text-ink-light transition-colors hover:bg-pistachio-50 hover:text-olive-900";
 
 export default function GuestsPage() {
   const { grupos, loading, crear, actualizar, eliminar, crearLote } = useGuestsAdmin();
@@ -26,6 +30,25 @@ export default function GuestsPage() {
   const [grupoDetalle, setGrupoDetalle] = useState<GrupoInvitacion | null>(null);
   const [confirmandoEliminar, setConfirmandoEliminar] = useState<GrupoInvitacion | null>(null);
   const [importandoAbierto, setImportandoAbierto] = useState(false);
+  const [menuExportarAbierto, setMenuExportarAbierto] = useState(false);
+  const [exportandoLista, setExportandoLista] = useState<"pdf" | "excel" | null>(null);
+  const menuExportarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuExportarAbierto) return;
+    function cerrarAlClicFuera(event: MouseEvent) {
+      if (!menuExportarRef.current?.contains(event.target as Node)) setMenuExportarAbierto(false);
+    }
+    function cerrarConEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuExportarAbierto(false);
+    }
+    document.addEventListener("mousedown", cerrarAlClicFuera);
+    document.addEventListener("keydown", cerrarConEscape);
+    return () => {
+      document.removeEventListener("mousedown", cerrarAlClicFuera);
+      document.removeEventListener("keydown", cerrarConEscape);
+    };
+  }, [menuExportarAbierto]);
 
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -87,6 +110,27 @@ export default function GuestsPage() {
     toast(`Exportados ${filtrados.length} grupos a ${tipo.toUpperCase()}.`, "success");
   }
 
+  async function exportarLista(
+    formato: "pdf" | "excel",
+    orden: OrdenListaInvitados,
+    estado: EstadoListaInvitados,
+  ) {
+    const grupos =
+      estado === "todos" ? filtrados : filtrados.filter((g) => g.estado === estado);
+    const mod = await import("@/lib/exportUtils");
+    if (formato === "pdf") mod.exportarListaInvitadosPdf(grupos, orden);
+    else mod.exportarListaInvitadosExcel(grupos, orden);
+    toast(
+      `Lista de invitados (${
+        estado === "todos" ? "todos" : ETIQUETAS_ESTADO[estado].toLowerCase()
+      }) exportada a ${formato.toUpperCase()} (${
+        orden === "grupo" ? "agrupado por grupo" : "orden alfabético"
+      }).`,
+      "success",
+    );
+    setExportandoLista(null);
+  }
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -102,30 +146,95 @@ export default function GuestsPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <motion.button
-            onClick={() => void exportar("excel")}
-            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Excel
-          </motion.button>
-          <motion.button
-            onClick={() => void exportar("csv")}
-            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            CSV
-          </motion.button>
-          <motion.button
-            onClick={() => void exportar("pdf")}
-            className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            PDF
-          </motion.button>
+          <div className="relative" ref={menuExportarRef}>
+            <motion.button
+              onClick={() => setMenuExportarAbierto((abierto) => !abierto)}
+              aria-haspopup="menu"
+              aria-expanded={menuExportarAbierto}
+              className="flex items-center gap-2 rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Exportar
+              <motion.svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3 w-3"
+                animate={{ rotate: menuExportarAbierto ? 180 : 0 }}
+              >
+                <path d="m6 9 6 6 6-6" />
+              </motion.svg>
+            </motion.button>
+            {menuExportarAbierto && (
+              <motion.div
+                role="menu"
+                className="absolute left-0 z-20 mt-2 w-60 rounded-xl border border-pistachio-200 bg-white p-1.5 shadow-cinematic"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={CLASE_OPCION_EXPORTAR}
+                  onClick={() => {
+                    setMenuExportarAbierto(false);
+                    void exportar("excel");
+                  }}
+                >
+                  Excel
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={CLASE_OPCION_EXPORTAR}
+                  onClick={() => {
+                    setMenuExportarAbierto(false);
+                    void exportar("csv");
+                  }}
+                >
+                  CSV
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={CLASE_OPCION_EXPORTAR}
+                  onClick={() => {
+                    setMenuExportarAbierto(false);
+                    void exportar("pdf");
+                  }}
+                >
+                  PDF
+                </button>
+                <div className="my-1 border-t border-pistachio-100" />
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={CLASE_OPCION_EXPORTAR}
+                  onClick={() => {
+                    setMenuExportarAbierto(false);
+                    setExportandoLista("pdf");
+                  }}
+                >
+                  Lista invitados PDF
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={CLASE_OPCION_EXPORTAR}
+                  onClick={() => {
+                    setMenuExportarAbierto(false);
+                    setExportandoLista("excel");
+                  }}
+                >
+                  Lista invitados Excel
+                </button>
+              </motion.div>
+            )}
+          </div>
           <motion.button
             onClick={() => setImportandoAbierto(true)}
             className="rounded-lg border border-pistachio-200 px-4 py-2 font-body text-xs uppercase tracking-wider text-ink-muted transition-colors hover:border-pistachio-400 hover:text-olive-900"
@@ -238,6 +347,14 @@ export default function GuestsPage() {
             confirmarLabel="Eliminar"
             onConfirmar={handleEliminar}
             onCancelar={() => setConfirmandoEliminar(null)}
+          />
+        )}
+
+        {exportandoLista && (
+          <ExportListaModal
+            formato={exportandoLista}
+            onCancelar={() => setExportandoLista(null)}
+            onExportar={(orden, estado) => void exportarLista(exportandoLista, orden, estado)}
           />
         )}
       </AnimatePresence>
